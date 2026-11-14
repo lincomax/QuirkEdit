@@ -1,16 +1,115 @@
-diff --git a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java
-index f1d1b43..c9db28d 100644
---- a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java
-+++ b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java
-@@ -42,6 +42,11 @@ public class WordBreakerProgram extends WordBreakerIcu {
-         // Add extra opportunities for dots
-         int index = end - 1;
-         while (index > start) {
-+            // Only split the word that overflows: earlier words stay on this row,
-+            // and the overflowing word moves down whole
-+            if (Character.isWhitespace(chars[index])) {
-+                return index + 1;
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/graphics/TextRow.java b/editor/src/main/java/io/github/rosemoe/sora/graphics/TextRow.java
+index 980ac56..4b247e3 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/graphics/TextRow.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/graphics/TextRow.java
+@@ -428,6 +428,10 @@ public class TextRow {
+                     // do anti-word-breaking
+                     int beforeOptimization = next;
+                     next = optimizer.getOptimizedBreakPoint(e.startColumn + offset, e.startColumn + next) - e.startColumn;
++                    // Spaces at the break hang at the end of this row instead of starting the next one
++                    while (next < limit && text.charAt(e.startColumn + next) == ' ') {
++                        next++;
++                    }
+                     float advance = 0f;
+                     for (int j = offset; j < next; j++) {
+                         advance += advances[j];
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreaker.java b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreaker.java
+index 26fae15..2f04b5c 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreaker.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreaker.java
+@@ -38,7 +38,7 @@ public interface WordBreaker {
+ 
+         @NonNull
+         public static WordBreaker newInstance(@NonNull ContentLine text) {
+-            return new WordBreakerProgram(text);
++            return new WordBreakerGreedy(text);
+         }
+ 
+     }
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerGreedy.java b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerGreedy.java
+new file mode 100644
+index 0000000..f9c1bf0
+--- /dev/null
++++ b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerGreedy.java
+@@ -0,0 +1,81 @@
++/*
++ *    sora-editor - the awesome code editor for Android
++ *    https://github.com/Rosemoe/sora-editor
++ *    Copyright (C) 2020-2025  Rosemoe
++ *
++ *     This library is free software; you can redistribute it and/or
++ *     modify it under the terms of the GNU Lesser General Public
++ *     License as published by the Free Software Foundation; either
++ *     version 2.1 of the License, or (at your option) any later version.
++ *
++ *     This library is distributed in the hope that it will be useful,
++ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *     Lesser General Public License for more details.
++ *
++ *     You should have received a copy of the GNU Lesser General Public
++ *     License along with this library; if not, write to the Free Software
++ *     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
++ *     USA
++ *
++ *     Please contact Rosemoe by email 2073412493@qq.com if you need
++ *     additional information or have any questions
++ */
++package io.github.rosemoe.sora.text.breaker;
++
++import androidx.annotation.NonNull;
++
++import io.github.rosemoe.sora.text.ContentLine;
++
++/**
++ * Classic greedy line breaking, as Android's original StaticLayout did it:
++ * fill the row, then break at the last opportunity that fits. Opportunities are
++ * after a space or tab, after '-' or '/' (unless a digit follows), and after
++ * '.', ',', ':' or ';' (unless a digit is on either side). With no opportunity,
++ * the row breaks at the last character that fits.
++ */
++public class WordBreakerGreedy implements WordBreaker {
++
++    private final char[] chars;
++    private final int length;
++
++    public WordBreakerGreedy(@NonNull ContentLine text) {
++        this.chars = text.getBackingCharArray();
++        this.length = text.length();
++    }
++
++    @Override
++    public int getOptimizedBreakPoint(int start, int end) {
++        if (end >= length || end <= start) {
++            return end;
++        }
++        // The first character that doesn't fit is a space: break right here,
++        // the space hangs at the end of this row
++        if (chars[end] == ' ' || chars[end] == '\t') {
++            return end;
++        }
++        for (int k = end; k > start; k--) {
++            if (isBreakAfter(k - 1)) {
++                return k;
 +            }
-             if (chars[index] == '.' && index - 1 >= start && !Character.isDigit(chars[index - 1])) {
-                 // Break after this dot
-                 return index + 1;
++        }
++        return end;
++    }
++
++    private boolean isBreakAfter(int i) {
++        char c = chars[i];
++        if (c == ' ' || c == '\t') {
++            return true;
++        }
++        boolean nextIsDigit = i + 1 < length && Character.isDigit(chars[i + 1]);
++        if (c == '-' || c == '/') {
++            return !nextIsDigit;
++        }
++        if (c == '.' || c == ',' || c == ':' || c == ';') {
++            boolean prevIsDigit = i > 0 && Character.isDigit(chars[i - 1]);
++            return !prevIsDigit && !nextIsDigit;
++        }
++        // CJK ideographs can break anywhere
++        return c >= 0x2E80 && Character.isIdeographic(c);
++    }
++}

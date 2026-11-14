@@ -74,10 +74,10 @@
     <string name="editor_statistics_selected" translatable="false">Selected</string>
     <string name="editor_untitled" translatable="false">untitled</string>
     <string name="editor_external_change_title" translatable="false">File changed</string>
-    <string name="editor_external_change_message" translatable="false">\"%1$s\" was changed outside the app. Reload it?</string>
+    <string name="editor_external_change_message" translatable="false">\"%1$s\" has been modified. Do you want to reload it?</string>
     <string name="editor_external_change_unsaved" translatable="false">Your unsaved changes in this tab will be lost.</string>
     <string name="editor_external_change_reload" translatable="false">Reload</string>
-    <string name="editor_external_change_keep" translatable="false">Keep mine</string>
+    <string name="editor_external_change_keep" translatable="false">No</string>
 
     <string name="editor_empty_view_title">No open files</string>
 
