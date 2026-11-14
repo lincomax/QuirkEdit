@@ -55,6 +55,8 @@ class SettingsManager(private val context: Context) {
         // Keyboard
         const val KEY_USE_EXTENDED_KEYBOARD = "use_extended_keyboard"
         const val KEY_MINI_TOOLBAR = "mini_toolbar"
+        const val KEY_MAGNIFIER = "magnifier"
+        const val KEY_HIGHLIGHT_COLOR = "highlight_color"
         const val KEY_KEYBOARD_PRESET = "keyboard_preset"
         const val KEY_SOFT_KEYBOARD = "soft_keyboard"
 
@@ -118,7 +120,7 @@ class SettingsManager(private val context: Context) {
         get() = sharedPreferences.getInt(KEY_FONT_SIZE, 14)
         set(value) = sharedPreferences.edit().putInt(KEY_FONT_SIZE, value).apply()
     var fontType: String
-        get() = sharedPreferences.getString(KEY_FONT_TYPE, "droid_sans_mono") ?: "droid_sans_mono"
+        get() = sharedPreferences.getString(KEY_FONT_TYPE, "system_default") ?: "system_default"
         set(value) = sharedPreferences.edit().putString(KEY_FONT_TYPE, value).apply()
 
     var wordWrap: Boolean
@@ -162,6 +164,14 @@ class SettingsManager(private val context: Context) {
     var extendedKeyboard: Boolean
         get() = sharedPreferences.getBoolean(KEY_USE_EXTENDED_KEYBOARD, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_USE_EXTENDED_KEYBOARD, value).apply()
+    var magnifier: Boolean
+        get() = sharedPreferences.getBoolean(KEY_MAGNIFIER, true)
+        set(value) = sharedPreferences.edit().putBoolean(KEY_MAGNIFIER, value).apply()
+
+    /** 0 means "use the theme's highlight color" */
+    var highlightColor: Int
+        get() = sharedPreferences.getInt(KEY_HIGHLIGHT_COLOR, 0)
+        set(value) = sharedPreferences.edit().putInt(KEY_HIGHLIGHT_COLOR, value).apply()
     var miniToolbar: Boolean
         get() = sharedPreferences.getBoolean(KEY_MINI_TOOLBAR, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_MINI_TOOLBAR, value).apply()

@@ -16,9 +16,13 @@
 
 package com.blacksquircle.ui.feature.editor.ui.editor.compose
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,17 +31,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.blacksquircle.ui.ds.PreviewBackground
-import com.blacksquircle.ui.ds.button.IconButton
-import com.blacksquircle.ui.ds.button.IconButtonSizeDefaults
-import com.blacksquircle.ui.ds.button.IconButtonStyleDefaults
+import com.blacksquircle.ui.ds.SquircleTheme
 import com.blacksquircle.ui.ds.tabs.TabItem
-import com.blacksquircle.ui.feature.editor.R
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.CloseMenu
-import com.blacksquircle.ui.ds.R as UiR
 
 @Composable
 internal fun DocumentTab(
@@ -55,7 +54,7 @@ internal fun DocumentTab(
     }
 
     TabItem(
-        title = if (modified) "• $name" else name,
+        title = if (modified) "*$name" else name,
         selected = selected,
         onClick = {
             if (selected) {
@@ -64,15 +63,15 @@ internal fun DocumentTab(
                 onDocumentClicked()
             }
         },
-        paddingValues = PaddingValues(start = 12.dp),
+        paddingValues = PaddingValues(start = 16.dp),
         trailingContent = {
-            IconButton(
-                iconResId = UiR.drawable.ic_close,
-                iconButtonStyle = IconButtonStyleDefaults.Secondary,
-                onClick = onCloseClicked,
-                contentDescription = stringResource(R.string.editor_menu_file_close),
-                iconButtonSize = IconButtonSizeDefaults.XXS,
-                modifier = Modifier.padding(horizontal = 8.dp)
+            /** Separator between tabs */
+            Spacer(Modifier.width(16.dp))
+            Box(
+                Modifier
+                    .width(1.dp)
+                    .height(22.dp)
+                    .background(SquircleTheme.colors.colorTextAndIconDisabled)
             )
         },
         anchor = {

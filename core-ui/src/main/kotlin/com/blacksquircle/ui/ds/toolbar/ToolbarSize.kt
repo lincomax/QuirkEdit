@@ -33,9 +33,24 @@ data class ToolbarSize(
     val iconButtonPadding: PaddingValues,
     val contentPadding: PaddingValues,
     val textSpacer: Dp,
+    val compactText: Boolean = false,
 )
 
 object ToolbarSizeDefaults {
+
+    /** Compact 48dp bar with a 16sp title and 12sp subtitle */
+    val S: ToolbarSize
+        get() = ToolbarSize(
+            height = 48.dp,
+            shadowSize = 4.dp,
+            emptyIconPadding = 8.dp,
+            emptyActionsPadding = 8.dp,
+            iconButtonSize = IconButtonSizeDefaults.M,
+            iconButtonPadding = PaddingValues(0.dp),
+            contentPadding = PaddingValues(horizontal = 8.dp),
+            textSpacer = 0.dp,
+            compactText = true,
+        )
 
     val M: ToolbarSize
         get() = ToolbarSize(

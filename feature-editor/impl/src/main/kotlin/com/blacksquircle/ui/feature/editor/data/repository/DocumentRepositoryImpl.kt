@@ -95,12 +95,60 @@ internal class DocumentRepositoryImpl(
         }
     }
 
+    override suspend fun openUntitled(name: String, position: Int): DocumentModel {
+        return withContext(dispatcherProvider.io()) {
+            val uuid = UUID.randomUUID().toString()
+            val document = DocumentModel(
+                uuid = uuid,
+                fileUri = DocumentModel.UNTITLED_PREFIX + uuid,
+                filesystemUuid = LocalFilesystem.LOCAL_UUID,
+                displayName = name,
+                language = LanguageScope.TEXT,
+                modified = false,
+                position = position,
+                scrollX = 0,
+                scrollY = 0,
+                selectionStart = 0,
+                selectionEnd = 0,
+                gitRepository = null,
+            )
+            documentDao.insert(DocumentMapper.toEntity(document))
+            cacheDocument(document, Content())
+            document
+        }
+    }
+
+    override suspend fun saveUntitledAs(
+        document: DocumentModel,
+        content: Content,
+        fileUri: Uri,
+    ): DocumentModel {
+        return withContext(dispatcherProvider.io()) {
+            val fileModel = resolveUri(fileUri)
+            val savedDocument = document.copy(
+                fileUri = fileModel.fileUri,
+                filesystemUuid = fileModel.filesystemUuid,
+                displayName = fileModel.name,
+                language = FileAssociation.guessLanguage(fileModel.extension)
+                    ?: document.language,
+                modified = false,
+            )
+            documentDao.update(DocumentMapper.toEntity(savedDocument))
+            saveDocument(savedDocument, content)
+            savedDocument
+        }
+    }
+
     override suspend fun loadDocument(document: DocumentModel): Content {
         return withContext(dispatcherProvider.io()) {
             settingsManager.selectedUuid = document.uuid
 
             if (cacheManager.isCached(document)) {
                 cacheManager.loadContent(document)
+            } else if (document.isUntitled) {
+                Content().also { content ->
+                    cacheDocument(document, content)
+                }
             } else {
                 if (!context.isStorageAccessGranted()) {
                     throw PermissionException()
@@ -120,6 +168,11 @@ internal class DocumentRepositoryImpl(
 
     override suspend fun saveDocument(document: DocumentModel, content: Content) {
         withContext(dispatcherProvider.io()) {
+            if (document.isUntitled) {
+                /** Untitled tabs only live in the cache until they're saved somewhere */
+                cacheDocument(document, content)
+                return@withContext
+            }
             val filesystem = filesystemFactory.create(document.filesystemUuid)
             val fileModel = DocumentMapper.toModel(document)
             val fileParams = FileParams(
@@ -219,8 +272,13 @@ internal class DocumentRepositoryImpl(
 
     override suspend fun openExternal(fileUri: Uri, position: Int): DocumentModel {
         return withContext(dispatcherProvider.io()) {
-            val fileModel = when {
-                DocumentsContract.isDocumentUri(context, fileUri) -> {
+            openDocument(resolveUri(fileUri), position)
+        }
+    }
+
+    private fun resolveUri(fileUri: Uri): FileModel {
+        return when {
+            DocumentsContract.isDocumentUri(context, fileUri) -> {
                     context.openUriAsDocument(fileUri)
                 }
 
@@ -232,9 +290,7 @@ internal class DocumentRepositoryImpl(
                     openUriAsFile(fileUri)
                 }
 
-                else -> throw IllegalArgumentException("File $fileUri not found")
-            }
-            openDocument(fileModel, position)
+            else -> throw IllegalArgumentException("File $fileUri not found")
         }
     }
 

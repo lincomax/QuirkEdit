@@ -26,6 +26,8 @@ internal interface DocumentRepository {
     suspend fun loadDocuments(): List<DocumentModel>
 
     suspend fun openDocument(fileModel: FileModel, position: Int): DocumentModel
+    suspend fun openUntitled(name: String, position: Int): DocumentModel
+    suspend fun saveUntitledAs(document: DocumentModel, content: Content, fileUri: Uri): DocumentModel
     suspend fun loadDocument(document: DocumentModel): Content
     suspend fun saveDocument(document: DocumentModel, content: Content)
     suspend fun cacheDocument(document: DocumentModel, content: Content)

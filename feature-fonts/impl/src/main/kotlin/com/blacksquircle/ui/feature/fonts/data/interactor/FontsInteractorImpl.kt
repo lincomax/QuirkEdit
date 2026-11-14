@@ -40,6 +40,9 @@ internal class FontsInteractorImpl(
             try {
                 /** Check if [fontId] is in assets */
                 val assetsFont = AssetsFont.find(fontId)
+                if (assetsFont == AssetsFont.SYSTEM_DEFAULT) {
+                    return@withContext Typeface.DEFAULT
+                }
                 if (assetsFont != null) {
                     val fontPath = assetsFont.fontUri.substring(ASSET_PATH.length)
                     return@withContext Typeface.createFromAsset(context.assets, fontPath)

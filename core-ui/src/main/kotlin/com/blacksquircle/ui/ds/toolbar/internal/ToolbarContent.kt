@@ -52,7 +52,11 @@ internal fun ToolbarContent(
         if (!title.isNullOrEmpty()) {
             Text(
                 text = title,
-                style = SquircleTheme.typography.text18Medium,
+                style = if (toolbarSize.compactText) {
+                    SquircleTheme.typography.text16Regular
+                } else {
+                    SquircleTheme.typography.text18Medium
+                },
                 color = SquircleTheme.colors.colorTextAndIconPrimary,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,

@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.blacksquircle.ui.ds.PreviewBackground
 import com.blacksquircle.ui.ds.button.IconButton
 import com.blacksquircle.ui.ds.toolbar.Toolbar
+import com.blacksquircle.ui.ds.toolbar.ToolbarSizeDefaults
 import com.blacksquircle.ui.feature.editor.R
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.EditMenu
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.FileMenu
@@ -66,6 +67,7 @@ internal fun EditorToolbar(
     onFindClicked: () -> Unit = {},
     onGoToLineClicked: () -> Unit = {},
     onForceSyntaxClicked: () -> Unit = {},
+    onStatisticsClicked: () -> Unit = {},
     onInsertColorClicked: () -> Unit = {},
     onFetchClicked: () -> Unit = {},
     onPullClicked: () -> Unit = {},
@@ -75,6 +77,7 @@ internal fun EditorToolbar(
     onTerminalClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
     onMiniToolbarClicked: () -> Unit = {},
+    onSymbolBarClicked: () -> Unit = {},
     onWordWrapClicked: () -> Unit = {},
     onReadOnlyClicked: () -> Unit = {},
 ) {
@@ -84,6 +87,9 @@ internal fun EditorToolbar(
     }
 
     Toolbar(
+        title = currentDocument?.document?.displayName,
+        subtitle = currentDocument?.document?.displayPath,
+        toolbarSize = ToolbarSizeDefaults.S,
         navigationIcon = UiR.drawable.ic_menu,
         onNavigationClicked = onDrawerClicked,
         navigationActions = {
@@ -137,11 +143,13 @@ internal fun EditorToolbar(
                         expanded = menuType == MenuType.OTHER,
                         onDismiss = { menuType = null },
                         miniToolbar = settings.miniToolbar,
+                        symbolBar = settings.extendedKeyboard,
                         wordWrap = settings.wordWrap,
                         readOnly = settings.readOnly,
                         onFindClicked = { menuType = null; onFindClicked() },
                         onGoToLineClicked = { menuType = null; onGoToLineClicked() },
                         onForceSyntaxClicked = { menuType = null; onForceSyntaxClicked() },
+                        onStatisticsClicked = { menuType = null; onStatisticsClicked() },
                         onGitClicked = { menuType = MenuType.GIT },
                         onTerminalClicked = {
                             focusManager.clearFocus(force = true)
@@ -154,6 +162,7 @@ internal fun EditorToolbar(
                             onSettingsClicked()
                         },
                         onMiniToolbarClicked = { menuType = null; onMiniToolbarClicked() },
+                        onSymbolBarClicked = { menuType = null; onSymbolBarClicked() },
                         onWordWrapClicked = { menuType = null; onWordWrapClicked() },
                         onReadOnlyClicked = { menuType = null; onReadOnlyClicked() },
                     )

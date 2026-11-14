@@ -33,7 +33,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -71,6 +74,7 @@ import com.blacksquircle.ui.feature.editor.ui.editor.compose.ErrorStatus
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.ExtendedKeyboard
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.MiniToolbar
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.SearchPanel
+import com.blacksquircle.ui.feature.editor.ui.editor.compose.StatisticsDialog
 import com.blacksquircle.ui.feature.editor.ui.editor.model.DocumentState
 import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorController
 import com.blacksquircle.ui.feature.editor.ui.editor.model.ErrorAction
@@ -121,6 +125,7 @@ internal fun EditorScreen(
         onReadOnlyClicked = viewModel::onReadOnlyClicked,
         onWordWrapClicked = viewModel::onWordWrapClicked,
         onMiniToolbarClicked = viewModel::onMiniToolbarClicked,
+        onSymbolBarClicked = viewModel::onExtendedKeyboardClicked,
         onCloseFileClicked = viewModel::onCloseFileClicked,
         onGoToLineClicked = viewModel::onGoToLineClicked,
         onContentChanged = viewModel::onContentChanged,
@@ -276,6 +281,7 @@ private fun EditorScreen(
     onReadOnlyClicked: () -> Unit = {},
     onWordWrapClicked: () -> Unit = {},
     onMiniToolbarClicked: () -> Unit = {},
+    onSymbolBarClicked: () -> Unit = {},
     onCloseFileClicked: () -> Unit = {},
     onGoToLineClicked: () -> Unit = {},
     onContentChanged: () -> Unit = {},
@@ -318,6 +324,15 @@ private fun EditorScreen(
     onExtraKeyClicked: (Char) -> Unit = {},
     onExtraOptionsClicked: () -> Unit = {},
 ) {
+    var showStatistics by remember { mutableStateOf(false) }
+    val statisticsContent = viewState.currentDocument?.content
+    if (showStatistics && statisticsContent != null) {
+        StatisticsDialog(
+            content = statisticsContent,
+            onDismiss = { showStatistics = false },
+        )
+    }
+
     ScaffoldSuite(
         topBar = {
             EditorToolbar(
@@ -341,6 +356,7 @@ private fun EditorScreen(
                 onRedoClicked = onRedoClicked,
                 onFindClicked = onToggleFindClicked,
                 onGoToLineClicked = onGoToLineClicked,
+                onStatisticsClicked = { showStatistics = true },
                 onForceSyntaxClicked = onForceSyntaxClicked,
                 onInsertColorClicked = onInsertColorClicked,
                 onFetchClicked = onFetchClicked,
@@ -351,6 +367,7 @@ private fun EditorScreen(
                 onTerminalClicked = onTerminalClicked,
                 onSettingsClicked = onSettingsClicked,
                 onMiniToolbarClicked = onMiniToolbarClicked,
+                onSymbolBarClicked = onSymbolBarClicked,
                 onWordWrapClicked = onWordWrapClicked,
                 onReadOnlyClicked = onReadOnlyClicked,
             )
@@ -456,6 +473,7 @@ private fun EditorScreen(
                         language = currentDocument.document.language,
                         settings = viewState.settings,
                         controller = editorController,
+                        autoFocus = currentDocument.document.isUntitled && content.length == 0,
                         onContentChanged = onContentChanged,
                         onShortcutPressed = onShortcutPressed,
                         modifier = Modifier.fillMaxSize(),

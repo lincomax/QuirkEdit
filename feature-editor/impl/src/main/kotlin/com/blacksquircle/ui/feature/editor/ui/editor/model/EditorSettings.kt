@@ -37,6 +37,8 @@ internal data class EditorSettings(
     val readOnly: Boolean = false,
     val extendedKeyboard: Boolean = false,
     val miniToolbar: Boolean = true,
+    val magnifier: Boolean = true,
+    val highlightColor: Int = 0,
     val keyboardPreset: List<Char> = emptyList(),
     val softKeyboard: Boolean = false,
     val autoIndentation: Boolean = true,

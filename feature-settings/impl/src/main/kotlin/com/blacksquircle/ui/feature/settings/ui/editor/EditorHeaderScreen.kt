@@ -16,26 +16,39 @@
 
 package com.blacksquircle.ui.feature.settings.ui.editor
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.blacksquircle.ui.core.extensions.daggerViewModel
 import com.blacksquircle.ui.core.extensions.showToast
 import com.blacksquircle.ui.core.mvi.ViewEvent
 import com.blacksquircle.ui.ds.PreviewBackground
+import com.blacksquircle.ui.ds.dialog.ColorPickerDialog
 import com.blacksquircle.ui.ds.divider.HorizontalDivider
+import com.blacksquircle.ui.ds.extensions.toHexString
 import com.blacksquircle.ui.ds.preference.Preference
 import com.blacksquircle.ui.ds.preference.PreferenceGroup
 import com.blacksquircle.ui.ds.preference.SliderPreference
@@ -75,6 +88,8 @@ internal fun EditorHeaderScreen(
         onKeyboardPresetChanged = viewModel::onKeyboardPresetChanged,
         onResetKeyboardClicked = viewModel::onResetKeyboardClicked,
         onSoftKeyboardChanged = viewModel::onSoftKeyboardChanged,
+        onMagnifierChanged = viewModel::onMagnifierChanged,
+        onHighlightColorChanged = viewModel::onHighlightColorChanged,
     )
 
     val context = LocalContext.current
@@ -108,7 +123,11 @@ private fun EditorHeaderScreen(
     onKeyboardPresetChanged: (String) -> Unit = {},
     onResetKeyboardClicked: () -> Unit = {},
     onSoftKeyboardChanged: (Boolean) -> Unit = {},
+    onMagnifierChanged: (Boolean) -> Unit = {},
+    onHighlightColorChanged: (Int) -> Unit = {},
 ) {
+    var showColorPicker by remember { mutableStateOf(false) }
+
     ScaffoldSuite(
         topBar = {
             Toolbar(
@@ -184,6 +203,32 @@ private fun EditorHeaderScreen(
                 checked = viewState.highlightCurrentLine,
                 onCheckedChange = onHighlightCurrentLineChanged,
             )
+            Preference(
+                title = stringResource(R.string.settings_highlight_color_title),
+                subtitle = if (viewState.highlightColor == 0) {
+                    stringResource(R.string.settings_highlight_color_default)
+                } else {
+                    Color(viewState.highlightColor).toHexString()
+                },
+                enabled = viewState.highlightCurrentLine,
+                onClick = { showColorPicker = true },
+                trailingContent = {
+                    if (viewState.highlightColor != 0) {
+                        Box(
+                            Modifier
+                                .padding(start = 16.dp)
+                                .size(24.dp)
+                                .background(Color(viewState.highlightColor), CircleShape)
+                        )
+                    }
+                },
+            )
+            SwitchPreference(
+                title = stringResource(R.string.settings_magnifier_title),
+                subtitle = stringResource(R.string.settings_magnifier_subtitle),
+                checked = viewState.magnifier,
+                onCheckedChange = onMagnifierChanged,
+            )
             SwitchPreference(
                 title = stringResource(R.string.settings_highlight_delimiters_title),
                 subtitle = stringResource(R.string.settings_highlight_delimiters_subtitle),
@@ -248,7 +293,34 @@ private fun EditorHeaderScreen(
             )
         }
     }
+
+    if (showColorPicker) {
+        Dialog(onDismissRequest = { showColorPicker = false }) {
+            ColorPickerDialog(
+                title = stringResource(R.string.settings_highlight_color_title),
+                confirmButton = stringResource(UiR.string.common_save),
+                dismissButton = stringResource(R.string.settings_highlight_color_reset),
+                brightnessSlider = true,
+                alphaSlider = true,
+                initialColor = if (viewState.highlightColor != 0) {
+                    Color(viewState.highlightColor)
+                } else {
+                    Color(DEFAULT_HIGHLIGHT_COLOR)
+                },
+                onColorSelected = { color ->
+                    showColorPicker = false
+                    onHighlightColorChanged(color.toArgb())
+                },
+                onDismissClicked = {
+                    showColorPicker = false
+                    onHighlightColorChanged(0)
+                },
+            )
+        }
+    }
 }
+
+private const val DEFAULT_HIGHLIGHT_COLOR = 0x33039BE5
 
 @PreviewLightDark
 @Composable

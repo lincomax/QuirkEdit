@@ -17,6 +17,7 @@
 package com.blacksquircle.ui.application
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,6 +40,10 @@ internal class MainActivity : ComponentActivity() {
         installSplashScreen()
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            /** The app paints its own navigation bar background */
+            window.isNavigationBarContrastEnforced = false
+        }
         AppComponent.buildOrGet(this).inject(this)
         setContent {
             MainScreen(

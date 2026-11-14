@@ -21,7 +21,7 @@
     "editor.cursor": "#E0E2E4",
     "editor.handle": "#FFA000",
     "editor.selection.background": "#664000",
-    "editor.currentLine.background": "#121212",
+    "editor.currentLine.background": "#33FFA000",
     "editor.highlightedDelimiters.background": "#664000",
     "editor.highlightedDelimiters.foreground": "#E0E2E4",
     "editor.matchHighlight.background": "#332000",

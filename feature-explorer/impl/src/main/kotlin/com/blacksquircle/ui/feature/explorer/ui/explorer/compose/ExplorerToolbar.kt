@@ -17,7 +17,7 @@
 package com.blacksquircle.ui.feature.explorer.ui.explorer.compose
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
@@ -74,6 +74,7 @@ internal fun ExplorerToolbar(
     onCopyPathClicked: () -> Unit = {},
     onCompressClicked: () -> Unit = {},
     onBackClicked: () -> Unit = {},
+    workspaces: @Composable () -> Unit = {},
 ) {
     val selectionMode = selection.isNotEmpty()
     val rootSelected = selection.size == 1 && selection[0].isRoot
@@ -125,7 +126,9 @@ internal fun ExplorerToolbar(
                     searchMode = false
                 }
             } else {
-                Spacer(Modifier.weight(1f))
+                Box(Modifier.weight(1f)) {
+                    workspaces()
+                }
             }
 
             /** Don't show file actions if root node is selected */

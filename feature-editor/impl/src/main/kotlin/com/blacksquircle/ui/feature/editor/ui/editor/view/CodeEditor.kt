@@ -20,7 +20,9 @@ import android.content.Context
 import android.util.AttributeSet
 import com.blacksquircle.ui.feature.editor.R
 import io.github.rosemoe.sora.text.Content
+import io.github.rosemoe.sora.widget.EditorRenderer
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
+import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
 import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.R as SoraR
 import io.github.rosemoe.sora.widget.CodeEditor as SoraEditor
@@ -40,6 +42,8 @@ import io.github.rosemoe.sora.widget.CodeEditor as SoraEditor
  * - Disabled block lines in word wrap mode
  * - Disabled horizontal scrollbar
  * - Enabled sticky text selection
+ * - Custom renderer for the current line highlight
+ * - Standard floating text selection toolbar
  */
 internal class CodeEditor @JvmOverloads constructor(
     context: Context,
@@ -71,6 +75,20 @@ internal class CodeEditor @JvmOverloads constructor(
             setLayout(SquircleCompletion())
             setAdapter(SquircleCompletion.Adapter())
         }
+        replaceComponent(EditorTextActionWindow::class.java, FloatingTextActions(this))
+    }
+
+    /** Current line highlight color; 0 means use the theme's color */
+    var highlightColor: Int = 0
+        set(value) {
+            if (field != value) {
+                field = value
+                invalidate()
+            }
+        }
+
+    override fun onCreateRenderer(): EditorRenderer {
+        return SquircleRenderer(this)
     }
 
     override fun applyAttributeSets(attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {

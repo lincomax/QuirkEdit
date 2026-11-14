@@ -157,6 +157,20 @@ internal class EditorHeaderViewModel @Inject constructor(
         }
     }
 
+    fun onMagnifierChanged(magnifier: Boolean) {
+        viewModelScope.launch {
+            settingsManager.magnifier = magnifier
+            _viewState.value = updateViewState()
+        }
+    }
+
+    fun onHighlightColorChanged(color: Int) {
+        viewModelScope.launch {
+            settingsManager.highlightColor = color
+            _viewState.value = updateViewState()
+        }
+    }
+
     fun onSoftKeyboardChanged(softKeyboard: Boolean) {
         viewModelScope.launch {
             settingsManager.softKeyboard = softKeyboard
@@ -181,6 +195,8 @@ internal class EditorHeaderViewModel @Inject constructor(
             extendedKeyboard = settingsManager.extendedKeyboard,
             keyboardPreset = settingsManager.keyboardPreset,
             softKeyboard = settingsManager.softKeyboard,
+            magnifier = settingsManager.magnifier,
+            highlightColor = settingsManager.highlightColor,
         )
     }
 

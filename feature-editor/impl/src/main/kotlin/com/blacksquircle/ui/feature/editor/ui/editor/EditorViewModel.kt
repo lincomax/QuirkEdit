@@ -127,7 +127,16 @@ internal class EditorViewModel @Inject constructor(
 
     fun onNewFileClicked() {
         viewModelScope.launch {
-            _viewEvent.send(EditorViewEvent.CreateFileContract)
+            try {
+                val name = stringProvider.getString(R.string.editor_untitled)
+                val document = documentRepository.openUntitled(name, documents.size)
+                loadDocument(document, fromUser = true)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, e.message)
+                _viewEvent.send(ViewEvent.Toast(e.message.orEmpty()))
+            }
         }
     }
 
@@ -146,6 +155,12 @@ internal class EditorViewModel @Inject constructor(
 
                 val document = documents[selectedPosition].document
                 val content = documents[selectedPosition].content ?: return@launch
+
+                /** Untitled tabs need a location first */
+                if (document.isUntitled) {
+                    _viewEvent.send(EditorViewEvent.SaveAsFileContract(document.displayName + ".txt"))
+                    return@launch
+                }
 
                 val updatedDocument = document.copy(
                     modified = false,
@@ -181,7 +196,12 @@ internal class EditorViewModel @Inject constructor(
                 return@launch
             }
             val document = documents[selectedPosition].document
-            _viewEvent.send(EditorViewEvent.SaveAsFileContract(document.displayName))
+            val fileName = if (document.isUntitled) {
+                document.displayName + ".txt"
+            } else {
+                document.displayName
+            }
+            _viewEvent.send(EditorViewEvent.SaveAsFileContract(fileName))
         }
     }
 
@@ -195,7 +215,27 @@ internal class EditorViewModel @Inject constructor(
                 val document = documents[selectedPosition].document
                 val content = documents[selectedPosition].content ?: return@launch
 
-                documentRepository.saveExternal(document, content, fileUri)
+                if (document.isUntitled) {
+                    /** The untitled tab becomes the saved file */
+                    val savedDocument = documentRepository.saveUntitledAs(
+                        document = document.copy(
+                            scrollX = content.scrollX,
+                            scrollY = content.scrollY,
+                            selectionStart = content.selectionStart,
+                            selectionEnd = content.selectionEnd,
+                        ),
+                        content = content,
+                        fileUri = fileUri,
+                    )
+                    documents = documents.mapSelected { state ->
+                        state.copy(document = savedDocument)
+                    }
+                    _viewState.update {
+                        it.copy(documents = documents)
+                    }
+                } else {
+                    documentRepository.saveExternal(document, content, fileUri)
+                }
 
                 val message = stringProvider.getString(R.string.editor_toast_file_saved)
                 _viewEvent.send(ViewEvent.Toast(message))
@@ -215,6 +255,9 @@ internal class EditorViewModel @Inject constructor(
             }
 
             val document = documents[selectedPosition].document
+            if (document.isUntitled) {
+                return@launch
+            }
             documents = documents.mapSelected { state ->
                 state.copy(
                     document = document.copy(modified = false),
@@ -253,6 +296,14 @@ internal class EditorViewModel @Inject constructor(
             it.copy(settings = settings)
         }
         settingsManager.miniToolbar = settings.miniToolbar
+    }
+
+    fun onExtendedKeyboardClicked() {
+        settings = settings.copy(extendedKeyboard = !settings.extendedKeyboard)
+        _viewState.update {
+            it.copy(settings = settings)
+        }
+        settingsManager.extendedKeyboard = settings.extendedKeyboard
     }
 
     fun onCloseFileClicked() {
@@ -1434,6 +1485,8 @@ internal class EditorViewModel @Inject constructor(
         readOnly = settingsManager.readOnly,
         extendedKeyboard = settingsManager.extendedKeyboard,
         miniToolbar = settingsManager.miniToolbar,
+        magnifier = settingsManager.magnifier,
+        highlightColor = settingsManager.highlightColor,
         keyboardPreset = settingsManager.keyboardPreset.toMutableList().distinct(),
         softKeyboard = settingsManager.softKeyboard,
         autoIndentation = settingsManager.autoIndentation,

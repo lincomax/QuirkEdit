@@ -44,7 +44,6 @@ import com.blacksquircle.ui.core.extensions.showToast
 import com.blacksquircle.ui.core.mvi.ViewEvent
 import com.blacksquircle.ui.ds.PreviewBackground
 import com.blacksquircle.ui.ds.SquircleTheme
-import com.blacksquircle.ui.ds.divider.VerticalDivider
 import com.blacksquircle.ui.ds.emptyview.EmptyView
 import com.blacksquircle.ui.ds.progress.CircularProgress
 import com.blacksquircle.ui.ds.scaffold.ScaffoldSuite
@@ -58,7 +57,7 @@ import com.blacksquircle.ui.feature.explorer.ui.explorer.compose.ErrorStatus
 import com.blacksquircle.ui.feature.explorer.ui.explorer.compose.ExplorerActionBar
 import com.blacksquircle.ui.feature.explorer.ui.explorer.compose.ExplorerToolbar
 import com.blacksquircle.ui.feature.explorer.ui.explorer.compose.FileExplorer
-import com.blacksquircle.ui.feature.explorer.ui.explorer.compose.Workspaces
+import com.blacksquircle.ui.feature.explorer.ui.explorer.compose.WorkspacesRow
 import com.blacksquircle.ui.feature.explorer.ui.explorer.model.FileNode
 import com.blacksquircle.ui.filesystem.base.model.FileModel
 import com.blacksquircle.ui.filesystem.local.LocalFilesystem
@@ -209,18 +208,6 @@ private fun ExplorerScreen(
     onRefreshClicked: () -> Unit = {},
 ) {
     Row(Modifier.fillMaxSize()) {
-        Workspaces(
-            workspaces = viewState.workspaces,
-            selectedWorkspace = viewState.selectedWorkspace,
-            onWorkspaceClicked = onWorkspaceClicked,
-            onAddWorkspaceClicked = onAddWorkspaceClicked,
-            onDeleteWorkspaceClicked = onDeleteWorkspaceClicked,
-        )
-
-        if (!SquircleTheme.colors.isDark) {
-            VerticalDivider()
-        }
-
         ScaffoldSuite(
             topBar = {
                 ExplorerToolbar(
@@ -246,6 +233,15 @@ private fun ExplorerScreen(
                     onCopyPathClicked = onCopyPathClicked,
                     onCompressClicked = onCompressClicked,
                     onBackClicked = onBackClicked,
+                    workspaces = {
+                        WorkspacesRow(
+                            workspaces = viewState.workspaces,
+                            selectedWorkspace = viewState.selectedWorkspace,
+                            onWorkspaceClicked = onWorkspaceClicked,
+                            onAddWorkspaceClicked = onAddWorkspaceClicked,
+                            onDeleteWorkspaceClicked = onDeleteWorkspaceClicked,
+                        )
+                    },
                 )
             },
             bottomBar = {

@@ -34,15 +34,18 @@ internal fun OtherMenu(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     miniToolbar: Boolean = true,
+    symbolBar: Boolean = true,
     wordWrap: Boolean = false,
     readOnly: Boolean = false,
     onFindClicked: () -> Unit = {},
     onGoToLineClicked: () -> Unit = {},
     onForceSyntaxClicked: () -> Unit = {},
+    onStatisticsClicked: () -> Unit = {},
     onGitClicked: () -> Unit = {},
     onTerminalClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
     onMiniToolbarClicked: () -> Unit = {},
+    onSymbolBarClicked: () -> Unit = {},
     onWordWrapClicked: () -> Unit = {},
     onReadOnlyClicked: () -> Unit = {},
 ) {
@@ -66,6 +69,11 @@ internal fun OtherMenu(
             title = stringResource(R.string.editor_menu_syntax),
             iconResId = UiR.drawable.ic_syntax,
             onClick = onForceSyntaxClicked,
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_statistics),
+            iconResId = UiR.drawable.ic_statistics,
+            onClick = onStatisticsClicked,
         )
         if (showGit) {
             PopupMenuItem(
@@ -91,6 +99,12 @@ internal fun OtherMenu(
             iconResId = UiR.drawable.ic_mini_toolbar,
             onClick = onMiniToolbarClicked,
             trailing = { CheckBox(checked = miniToolbar, onClick = onMiniToolbarClicked) },
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_symbol_bar),
+            iconResId = UiR.drawable.ic_keyboard,
+            onClick = onSymbolBarClicked,
+            trailing = { CheckBox(checked = symbolBar, onClick = onSymbolBarClicked) },
         )
         PopupMenuItem(
             title = stringResource(R.string.editor_menu_word_wrap),

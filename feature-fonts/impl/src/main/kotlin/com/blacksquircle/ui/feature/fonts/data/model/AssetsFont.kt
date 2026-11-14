@@ -21,6 +21,11 @@ internal enum class AssetsFont(
     val fontName: String,
     val fontUri: String,
 ) {
+    SYSTEM_DEFAULT(
+        fontId = "system_default",
+        fontName = "Roboto (System)",
+        fontUri = SYSTEM_FONT_URI,
+    ),
     JETBRAINS_MONO(
         fontId = "jetbrains_mono",
         fontName = "JetBrains Mono",
@@ -53,6 +58,8 @@ internal enum class AssetsFont(
     );
 
     companion object {
+
+        const val SYSTEM_FONT_URI = "system://sans-serif"
 
         fun find(uuid: String): AssetsFont? {
             return entries.find { it.fontId == uuid }

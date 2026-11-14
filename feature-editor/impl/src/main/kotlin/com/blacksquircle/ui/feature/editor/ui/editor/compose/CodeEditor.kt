@@ -18,6 +18,7 @@ package com.blacksquircle.ui.feature.editor.ui.editor.compose
 
 import android.view.KeyEvent
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -42,6 +43,8 @@ import io.github.rosemoe.sora.event.KeyBindingEvent
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.util.regex.RegexBackrefGrammar
 import io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions
+import io.github.rosemoe.sora.widget.component.Magnifier
+import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.widget.subscribeAlways
 
 @Composable
@@ -51,6 +54,7 @@ internal fun CodeEditor(
     settings: EditorSettings,
     controller: EditorController,
     modifier: Modifier = Modifier,
+    autoFocus: Boolean = false,
     onContentChanged: () -> Unit = {},
     onShortcutPressed: (Boolean, Boolean, Boolean, Int) -> Unit = { _, _, _, _ -> },
 ) {
@@ -97,6 +101,8 @@ internal fun CodeEditor(
             editor.typefaceLineNumber = settings.fontType
             editor.isDisableSoftKbdIfHardKbdAvailable = !settings.softKeyboard
             editor.setShowInvisibleChars(settings.showInvisibleChars)
+            editor.getComponent<Magnifier>().isEnabled = settings.magnifier
+            editor.highlightColor = settings.highlightColor
 
             val editorLanguage = editor.createFromRegistry(
                 language = language,
@@ -114,6 +120,16 @@ internal fun CodeEditor(
         onRelease = CodeEditor::release,
         modifier = modifier,
     )
+    LaunchedEffect(Unit) {
+        if (autoFocus) {
+            /** New empty tab: put the cursor in it and bring up the keyboard */
+            view.post {
+                view.requestFocus()
+                val imm = context.getSystemService(InputMethodManager::class.java)
+                imm?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
+    }
     LaunchedEffect(Unit) {
         controller.commands.collect { command ->
             when (command) {

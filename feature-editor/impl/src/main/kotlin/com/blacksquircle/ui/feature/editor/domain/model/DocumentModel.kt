@@ -16,6 +16,7 @@
 
 package com.blacksquircle.ui.feature.editor.domain.model
 
+import android.net.Uri
 import java.io.File
 
 internal data class DocumentModel(
@@ -38,4 +39,32 @@ internal data class DocumentModel(
         get() = fileUri.substringAfterLast("://").ifEmpty(File::separator)
     val extension: String
         get() = "." + displayName.substringAfterLast('.')
+
+    /** A new tab that hasn't been saved anywhere yet */
+    val isUntitled: Boolean
+        get() = fileUri.startsWith(UNTITLED_PREFIX)
+
+    /** Human-readable location of the file, shown under the file name */
+    val displayPath: String?
+        get() = when {
+            isUntitled -> null
+            scheme == "file" -> path
+            scheme == "content" -> {
+                val decoded = Uri.decode(fileUri)
+                val documentId = decoded.substringAfterLast("/document/", "")
+                when {
+                    documentId.startsWith("primary:") ->
+                        "/storage/emulated/0/" + documentId.removePrefix("primary:")
+                    documentId.startsWith("raw:") -> documentId.removePrefix("raw:")
+                    documentId.contains(":") && !documentId.startsWith("msf:") ->
+                        "/storage/" + documentId.replaceFirst(":", "/")
+                    else -> decoded
+                }
+            }
+            else -> fileUri
+        }
+
+    companion object {
+        const val UNTITLED_PREFIX = "untitled://"
+    }
 }
