@@ -55,6 +55,7 @@ internal fun CodeEditor(
     controller: EditorController,
     modifier: Modifier = Modifier,
     autoFocus: Boolean = false,
+    onAutoFocusConsumed: () -> Unit = {},
     onContentChanged: () -> Unit = {},
     onShortcutPressed: (Boolean, Boolean, Boolean, Int) -> Unit = { _, _, _, _ -> },
 ) {
@@ -121,13 +122,21 @@ internal fun CodeEditor(
         modifier = modifier,
     )
     LaunchedEffect(Unit) {
+        val imm = context.getSystemService(InputMethodManager::class.java)
         if (autoFocus) {
-            /** New empty tab: put the cursor in it and bring up the keyboard */
+            /** Brand-new tab: put the cursor in it and bring up the keyboard */
+            onAutoFocusConsumed()
             view.post {
                 view.requestFocus()
-                val imm = context.getSystemService(InputMethodManager::class.java)
                 imm?.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
             }
+        } else {
+            /** Otherwise wait for a tap in the editor before showing the keyboard */
+            view.postDelayed({
+                if (!view.isPressed) {
+                    imm?.hideSoftInputFromWindow(view.windowToken, 0)
+                }
+            }, KEYBOARD_HIDE_DELAY)
         }
     }
     LaunchedEffect(Unit) {
@@ -214,3 +223,5 @@ internal fun CodeEditor(
         }
     }
 }
+
+private const val KEYBOARD_HIDE_DELAY = 250L

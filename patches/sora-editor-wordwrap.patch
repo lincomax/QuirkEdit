@@ -1,0 +1,16 @@
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java
+index f1d1b43..c9db28d 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/text/breaker/WordBreakerProgram.java
+@@ -42,6 +42,11 @@ public class WordBreakerProgram extends WordBreakerIcu {
+         // Add extra opportunities for dots
+         int index = end - 1;
+         while (index > start) {
++            // Only split the word that overflows: earlier words stay on this row,
++            // and the overflowing word moves down whole
++            if (Character.isWhitespace(chars[index])) {
++                return index + 1;
++            }
+             if (chars[index] == '.' && index - 1 >= start && !Character.isDigit(chars[index - 1])) {
+                 // Break after this dot
+                 return index + 1;

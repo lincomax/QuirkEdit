@@ -28,6 +28,8 @@ internal data class EditorViewState(
     val settings: EditorSettings = EditorSettings(),
     val showExtraKeys: Boolean = false,
     val isLoading: Boolean = true,
+    /** New tab that should get the keyboard once */
+    val autoFocusUuid: String? = null,
 ) : ViewState {
 
     val currentDocument: DocumentState?

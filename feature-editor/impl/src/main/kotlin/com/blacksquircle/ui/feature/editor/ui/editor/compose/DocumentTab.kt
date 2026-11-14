@@ -64,6 +64,7 @@ internal fun DocumentTab(
             }
         },
         paddingValues = PaddingValues(start = 16.dp),
+        textStyle = SquircleTheme.typography.text14Regular,
         trailingContent = {
             /** Separator between tabs */
             Spacer(Modifier.width(16.dp))

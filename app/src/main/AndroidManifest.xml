@@ -42,7 +42,7 @@
 
         <activity
             android:name=".application.MainActivity"
-            android:windowSoftInputMode="adjustResize"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
             android:configChanges="keyboard|keyboardHidden"
             android:launchMode="singleTask"
             android:exported="true">

@@ -122,6 +122,6 @@ internal class CodeEditor @JvmOverloads constructor(
         private const val MIN_GUTTER_WIDTH = 28
         private const val DIVIDER_MARGIN_LEFT = 2
         private const val DIVIDER_MARGIN_RIGHT = 4
-        private const val CURSOR_WIDTH = 2
+        private const val CURSOR_WIDTH = 1.25f
     }
 }

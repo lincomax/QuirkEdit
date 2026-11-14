@@ -16,6 +16,7 @@
 package com.blacksquircle.ui.feature.editor.ui.editor.view
 
 import android.graphics.Canvas
+import android.graphics.Paint
 import io.github.rosemoe.sora.widget.EditorRenderer
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
 
@@ -23,8 +24,14 @@ import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
  * Changes:
  * - Current line highlight can use a custom color
  * - In word wrap mode, only the visual row with the cursor is highlighted
+ * - The highlight stays out of the line number column
  */
 internal class SquircleRenderer(private val codeEditor: CodeEditor) : EditorRenderer(codeEditor) {
+
+    private val highlightPaint = Paint().apply {
+        style = Paint.Style.FILL
+        isAntiAlias = false
+    }
 
     override fun drawRowBackground(canvas: Canvas, color: Int, row: Int, right: Int) {
         val currentLineColor = codeEditor.colorScheme.getColor(EditorColorScheme.CURRENT_LINE)
@@ -32,11 +39,28 @@ internal class SquircleRenderer(private val codeEditor: CodeEditor) : EditorRend
             super.drawRowBackground(canvas, color, row, right)
             return
         }
+        if (right < codeEditor.width) {
+            /** This is the line number column pass, leave it alone */
+            return
+        }
         if (codeEditor.isWordwrap && row != cursorRow()) {
             return
         }
         val override = codeEditor.highlightColor
-        super.drawRowBackground(canvas, if (override != 0) override else color, row, right)
+        highlightPaint.color = if (override != 0) override else color
+        val top = codeEditor.getRowTop(row) - codeEditor.offsetY
+        val bottom = codeEditor.getRowBottom(row) - codeEditor.offsetY
+        canvas.drawRect(textRegionLeft(), top.toFloat(), right.toFloat(), bottom.toFloat(), highlightPaint)
+    }
+
+    /** Where the text area starts, to the right of the line numbers */
+    private fun textRegionLeft(): Float {
+        if (!codeEditor.isLineNumberEnabled) {
+            return 0f
+        }
+        val offset = codeEditor.measureTextRegionOffset() - codeEditor.dividerMarginRight
+        val left = if (codeEditor.isLineNumberPinned) offset else offset - codeEditor.offsetX
+        return left.coerceAtLeast(0f)
     }
 
     private fun cursorRow(): Int {

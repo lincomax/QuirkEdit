@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -51,6 +52,7 @@ fun TabItem(
     leadingContent: @Composable (() -> Unit)? = null,
     trailingContent: @Composable (() -> Unit)? = null,
     anchor: @Composable (() -> Unit)? = null,
+    textStyle: TextStyle = SquircleTheme.typography.text14Bold,
 ) {
     Box(modifier.width(IntrinsicSize.Max)) {
         if (anchor != null) {
@@ -77,7 +79,7 @@ fun TabItem(
             Text(
                 text = title,
                 color = SquircleTheme.colors.colorTextAndIconPrimary,
-                style = SquircleTheme.typography.text14Bold,
+                style = textStyle,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,

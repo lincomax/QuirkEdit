@@ -18,7 +18,7 @@
     "editor.background": "#FFFFFF",
     "editor.foreground": "#24292E",
     "editor.whitespace": "#C8C8C8",
-    "editor.cursor": "#24292E",
+    "editor.cursor": "#039BE5",
     "editor.handle": "#43A047",
     "editor.selection.background": "#B4D9B5",
     "editor.currentLine.background": "#3343A047",

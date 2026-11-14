@@ -27,6 +27,12 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Apply editor engine patches
+        run: |
+          for patch in patches/sora-editor-*.patch; do
+            git -C sora-editor apply "../$patch"
+          done
+
       - name: Setup signing key
         env:
           SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}

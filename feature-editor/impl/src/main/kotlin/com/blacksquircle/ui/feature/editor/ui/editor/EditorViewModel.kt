@@ -130,6 +130,9 @@ internal class EditorViewModel @Inject constructor(
             try {
                 val name = stringProvider.getString(R.string.editor_untitled)
                 val document = documentRepository.openUntitled(name, documents.size)
+                _viewState.update {
+                    it.copy(autoFocusUuid = document.uuid)
+                }
                 loadDocument(document, fromUser = true)
             } catch (e: CancellationException) {
                 throw e
@@ -296,6 +299,12 @@ internal class EditorViewModel @Inject constructor(
             it.copy(settings = settings)
         }
         settingsManager.miniToolbar = settings.miniToolbar
+    }
+
+    fun onAutoFocusConsumed() {
+        _viewState.update {
+            it.copy(autoFocusUuid = null)
+        }
     }
 
     fun onExtendedKeyboardClicked() {
