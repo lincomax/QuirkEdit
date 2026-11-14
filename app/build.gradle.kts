@@ -24,6 +24,12 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Kotlin 2.3.0 bug KT-83266: the Compose mapping step chokes on Java 25 class files
+// inside a dependency. The mapping is only used for crash-report deobfuscation.
+composeCompiler {
+    includeComposeMappingFile.set(false)
+}
+
 android {
     namespace = "com.blacksquircle.ui"
 
