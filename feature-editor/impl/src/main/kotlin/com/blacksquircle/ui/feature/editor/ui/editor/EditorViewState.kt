@@ -16,6 +16,7 @@
 
 package com.blacksquircle.ui.feature.editor.ui.editor
 
+import com.blacksquircle.ui.feature.editor.domain.model.DocumentModel
 import androidx.compose.runtime.Immutable
 import com.blacksquircle.ui.core.mvi.ViewState
 import com.blacksquircle.ui.feature.editor.ui.editor.model.DocumentState
@@ -30,6 +31,8 @@ internal data class EditorViewState(
     val isLoading: Boolean = true,
     /** New tab that should get the keyboard once */
     val autoFocusUuid: String? = null,
+    /** Open file that was changed by another app */
+    val externalChange: DocumentModel? = null,
 ) : ViewState {
 
     val currentDocument: DocumentState?

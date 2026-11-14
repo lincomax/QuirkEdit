@@ -72,6 +72,7 @@ import com.blacksquircle.ui.feature.editor.ui.editor.compose.DocumentTabLayout
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.EditorToolbar
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.ErrorStatus
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.ExtendedKeyboard
+import com.blacksquircle.ui.feature.editor.ui.editor.compose.ExternalChangeDialog
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.MiniToolbar
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.SearchPanel
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.StatisticsDialog
@@ -127,6 +128,8 @@ internal fun EditorScreen(
         onMiniToolbarClicked = viewModel::onMiniToolbarClicked,
         onSymbolBarClicked = viewModel::onExtendedKeyboardClicked,
         onAutoFocusConsumed = viewModel::onAutoFocusConsumed,
+        onExternalChangeReloadClicked = viewModel::onExternalChangeReloadClicked,
+        onExternalChangeKeepClicked = viewModel::onExternalChangeKeepClicked,
         onCloseFileClicked = viewModel::onCloseFileClicked,
         onGoToLineClicked = viewModel::onGoToLineClicked,
         onContentChanged = viewModel::onContentChanged,
@@ -284,6 +287,8 @@ private fun EditorScreen(
     onMiniToolbarClicked: () -> Unit = {},
     onSymbolBarClicked: () -> Unit = {},
     onAutoFocusConsumed: () -> Unit = {},
+    onExternalChangeReloadClicked: () -> Unit = {},
+    onExternalChangeKeepClicked: () -> Unit = {},
     onCloseFileClicked: () -> Unit = {},
     onGoToLineClicked: () -> Unit = {},
     onContentChanged: () -> Unit = {},
@@ -326,6 +331,18 @@ private fun EditorScreen(
     onExtraKeyClicked: (Char) -> Unit = {},
     onExtraOptionsClicked: () -> Unit = {},
 ) {
+    val externalChange = viewState.externalChange
+    if (externalChange != null) {
+        ExternalChangeDialog(
+            document = externalChange,
+            hasUnsavedChanges = viewState.documents.any {
+                it.document.uuid == externalChange.uuid && it.document.modified
+            },
+            onReloadClicked = onExternalChangeReloadClicked,
+            onKeepClicked = onExternalChangeKeepClicked,
+        )
+    }
+
     var showStatistics by remember { mutableStateOf(false) }
     val statisticsContent = viewState.currentDocument?.content
     if (showStatistics && statisticsContent != null) {

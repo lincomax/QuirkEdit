@@ -99,6 +99,7 @@ internal class EditorViewModel @Inject constructor(
     val viewEvent: Flow<ViewEvent> = _viewEvent.receiveAsFlow()
 
     private var documents = emptyList<DocumentState>()
+    private val pendingExternalChanges = ArrayDeque<String>()
     private var selectedPosition = -1
     private var settings = EditorSettings()
     private var currentJob: Job? = null
@@ -299,6 +300,101 @@ internal class EditorViewModel @Inject constructor(
             it.copy(settings = settings)
         }
         settingsManager.miniToolbar = settings.miniToolbar
+    }
+
+    /** Looks for open files that another app changed while we were away */
+    private suspend fun checkExternalChanges() {
+        if (_viewState.value.externalChange != null) {
+            return
+        }
+        for (state in documents) {
+            val document = state.document
+            if (document.uuid in pendingExternalChanges) {
+                continue
+            }
+            if (documentRepository.isChangedExternally(document)) {
+                pendingExternalChanges.addLast(document.uuid)
+            }
+        }
+        showNextExternalChange()
+    }
+
+    private fun showNextExternalChange() {
+        while (pendingExternalChanges.isNotEmpty()) {
+            val uuid = pendingExternalChanges.removeFirst()
+            val document = documents.find { it.document.uuid == uuid }?.document ?: continue
+            _viewState.update {
+                it.copy(externalChange = document)
+            }
+            return
+        }
+        _viewState.update {
+            it.copy(externalChange = null)
+        }
+    }
+
+    fun onExternalChangeReloadClicked() {
+        val document = _viewState.value.externalChange ?: return
+        viewModelScope.launch {
+            try {
+                val index = documents.indexOf { it.document.uuid == document.uuid }
+                if (index != -1) {
+                    val tabDocument = documents[index].document
+                    documents = documents.mapIndexed { i, state ->
+                        if (i == index) {
+                            state.copy(
+                                document = tabDocument.copy(modified = false),
+                                content = null,
+                                canUndo = false,
+                                canRedo = false,
+                            )
+                        } else {
+                            state
+                        }
+                    }
+                    _viewState.update {
+                        it.copy(documents = documents)
+                    }
+                    documentRepository.refreshDocument(tabDocument)
+                    if (index == selectedPosition) {
+                        loadDocument(tabDocument, fromUser = false)
+                    } else {
+                        documentRepository.acceptExternalChange(tabDocument)
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, e.message)
+                _viewEvent.send(ViewEvent.Toast(e.message.orEmpty()))
+            }
+            showNextExternalChange()
+        }
+    }
+
+    fun onExternalChangeKeepClicked() {
+        val document = _viewState.value.externalChange ?: return
+        viewModelScope.launch {
+            try {
+                documentRepository.acceptExternalChange(document)
+                /** The app's copy now differs from the file, so it counts as unsaved */
+                documents = documents.map { state ->
+                    if (state.document.uuid == document.uuid) {
+                        state.copy(document = state.document.copy(modified = true))
+                    } else {
+                        state
+                    }
+                }
+                _viewState.update {
+                    it.copy(documents = documents)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, e.message)
+            }
+            showNextExternalChange()
+        }
     }
 
     fun onAutoFocusConsumed() {
@@ -1157,6 +1253,7 @@ internal class EditorViewModel @Inject constructor(
                         it.copy(settings = settings)
                     }
                 }
+                checkExternalChanges()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {

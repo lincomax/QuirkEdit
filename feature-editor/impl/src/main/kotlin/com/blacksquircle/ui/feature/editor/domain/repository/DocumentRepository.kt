@@ -27,6 +27,12 @@ internal interface DocumentRepository {
 
     suspend fun openDocument(fileModel: FileModel, position: Int): DocumentModel
     suspend fun openUntitled(name: String, position: Int): DocumentModel
+
+    /** True if the file on disk changed since it was last loaded or saved by the app */
+    suspend fun isChangedExternally(document: DocumentModel): Boolean
+
+    /** Treat the file's current contents on disk as the known version */
+    suspend fun acceptExternalChange(document: DocumentModel)
     suspend fun saveUntitledAs(document: DocumentModel, content: Content, fileUri: Uri): DocumentModel
     suspend fun loadDocument(document: DocumentModel): Content
     suspend fun saveDocument(document: DocumentModel, content: Content)

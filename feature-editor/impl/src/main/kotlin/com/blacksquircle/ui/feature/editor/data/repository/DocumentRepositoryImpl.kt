@@ -45,8 +45,9 @@ import com.blacksquircle.ui.filesystem.base.model.LineBreak
 import com.blacksquircle.ui.filesystem.local.LocalFilesystem
 import com.blacksquircle.ui.filesystem.saf.SAFFilesystem
 import io.github.rosemoe.sora.text.Content
-import kotlinx.coroutines.withContext
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.withContext
 
 internal class DocumentRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
@@ -139,6 +140,56 @@ internal class DocumentRepositoryImpl(
         }
     }
 
+    /** Fingerprint of each open file's contents on disk, as last loaded or saved by the app */
+    private val diskFingerprints = ConcurrentHashMap<String, Long>()
+
+    private fun fingerprint(text: String): Long {
+        return (text.length.toLong() shl 32) or (text.hashCode().toLong() and 0xFFFFFFFFL)
+    }
+
+    private fun canWatch(document: DocumentModel): Boolean {
+        return !document.isUntitled && document.filesystemUuid in WATCHED_FILESYSTEMS
+    }
+
+    private fun readDiskText(document: DocumentModel): String {
+        val filesystem = filesystemFactory.create(document.filesystemUuid)
+        val fileModel = DocumentMapper.toModel(document)
+        val fileParams = FileParams(
+            chardet = settingsManager.encodingAutoDetect,
+            charset = charsetFor(settingsManager.encodingForOpening),
+        )
+        return filesystem.loadFile(fileModel, fileParams)
+    }
+
+    override suspend fun isChangedExternally(document: DocumentModel): Boolean {
+        return withContext(dispatcherProvider.io()) {
+            if (!canWatch(document)) {
+                return@withContext false
+            }
+            val current = try {
+                fingerprint(readDiskText(document))
+            } catch (e: Exception) {
+                /** Missing or unreadable files aren't reported here */
+                return@withContext false
+            }
+            val known = diskFingerprints.putIfAbsent(document.uuid, current)
+            known != null && known != current
+        }
+    }
+
+    override suspend fun acceptExternalChange(document: DocumentModel) {
+        withContext(dispatcherProvider.io()) {
+            if (!canWatch(document)) {
+                return@withContext
+            }
+            try {
+                diskFingerprints[document.uuid] = fingerprint(readDiskText(document))
+            } catch (e: Exception) {
+                diskFingerprints.remove(document.uuid)
+            }
+        }
+    }
+
     override suspend fun loadDocument(document: DocumentModel): Content {
         return withContext(dispatcherProvider.io()) {
             settingsManager.selectedUuid = document.uuid
@@ -159,7 +210,9 @@ internal class DocumentRepositoryImpl(
                     chardet = settingsManager.encodingAutoDetect,
                     charset = charsetFor(settingsManager.encodingForOpening),
                 )
-                Content(filesystem.loadFile(fileModel, fileParams)).also { content ->
+                val text = filesystem.loadFile(fileModel, fileParams)
+                diskFingerprints[document.uuid] = fingerprint(text)
+                Content(text).also { content ->
                     cacheDocument(document, content)
                 }
             }
@@ -181,6 +234,14 @@ internal class DocumentRepositoryImpl(
             )
             filesystem.saveFile(fileModel, content.toString(), fileParams).also {
                 cacheDocument(document, content)
+            }
+            /** Remember what our own save wrote, so it isn't reported as an outside change */
+            if (canWatch(document)) {
+                try {
+                    diskFingerprints[document.uuid] = fingerprint(readDiskText(document))
+                } catch (e: Exception) {
+                    diskFingerprints.remove(document.uuid)
+                }
             }
         }
     }
@@ -310,5 +371,13 @@ internal class DocumentRepositoryImpl(
             )
             filesystem.saveFile(fileModel, content.toString(), fileParams)
         }
+    }
+
+    companion object {
+        private val WATCHED_FILESYSTEMS = setOf(
+            LocalFilesystem.LOCAL_UUID,
+            SAFFilesystem.SAF_UUID,
+            "root",
+        )
     }
 }
