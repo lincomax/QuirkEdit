@@ -91,7 +91,7 @@ internal class FloatingTextActions(
     }
 
     override fun displayWindow() {
-        if (!isEnabled || codeEditor.snippetController.isInSnippet ||
+        if (!isEnabled || codeEditor.snippetController.isInSnippet() ||
             !codeEditor.hasFocus() || codeEditor.isInMouseMode
         ) {
             return
