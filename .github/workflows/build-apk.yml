@@ -36,11 +36,28 @@ jobs:
             echo "::error::Add the SIGNING_KEYSTORE and SIGNING_PASSWORD secrets (Settings > Secrets and variables > Actions) before building."
             exit 1
           fi
-          echo "$SIGNING_KEYSTORE" | base64 -d > app/keystore.jks
+          echo "$SIGNING_KEYSTORE" | tr -d ' \r\n' | base64 -d > app/keystore.jks
+          # Check the keystore opens with the password, and find the key's name (alias).
+          if ! LIST=$(keytool -list -keystore app/keystore.jks -storepass "$SIGNING_PASSWORD" 2>&1); then
+            echo "::error::Keystore didn't open: $(echo "$LIST" | grep -i -m1 'error\|exception\|incorrect')"
+            echo "::error::Check that SIGNING_PASSWORD matches the keystore and SIGNING_KEYSTORE is its full base64 text."
+            exit 1
+          fi
+          ALIASES=$(echo "$LIST" | grep -E 'PrivateKeyEntry' | cut -d, -f1)
+          echo "Keys found in keystore: $(echo $ALIASES)"
+          if echo "$ALIASES" | grep -qx squickedit; then
+            ALIAS=squickedit
+          elif [ "$(echo "$ALIASES" | grep -c .)" = "1" ]; then
+            ALIAS="$ALIASES"
+          else
+            echo "::error::No key named 'squickedit' in the keystore. Keys found: $(echo $ALIASES)"
+            exit 1
+          fi
+          echo "Signing with key: $ALIAS"
           {
             echo "KEYSTORE_PATH=keystore.jks"
             echo "KEYSTORE_PASSWORD=$SIGNING_PASSWORD"
-            echo "KEY_ALIAS=squickedit"
+            echo "KEY_ALIAS=$ALIAS"
             echo "KEY_PASSWORD=$SIGNING_PASSWORD"
           } > local.properties
 
