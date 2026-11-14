@@ -16,6 +16,9 @@
 
 package com.blacksquircle.ui.feature.fonts.data.model
 
+/** Marks the built-in system font (Roboto) rather than a font file */
+internal const val SYSTEM_FONT_URI = "system://sans-serif"
+
 internal enum class AssetsFont(
     val fontId: String,
     val fontName: String,
@@ -58,8 +61,6 @@ internal enum class AssetsFont(
     );
 
     companion object {
-
-        const val SYSTEM_FONT_URI = "system://sans-serif"
 
         fun find(uuid: String): AssetsFont? {
             return entries.find { it.fontId == uuid }

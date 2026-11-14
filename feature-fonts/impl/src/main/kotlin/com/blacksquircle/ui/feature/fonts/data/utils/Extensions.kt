@@ -18,14 +18,14 @@ package com.blacksquircle.ui.feature.fonts.data.utils
 
 import android.content.Context
 import android.graphics.Typeface
-import com.blacksquircle.ui.feature.fonts.data.model.AssetsFont
+import com.blacksquircle.ui.feature.fonts.data.model.SYSTEM_FONT_URI
 import timber.log.Timber
 
 private const val ASSET_PATH = "file:///android_asset/"
 
 internal fun Context.createTypefaceFromPath(fontPath: String): Typeface {
     return try {
-        if (fontPath == AssetsFont.SYSTEM_FONT_URI) {
+        if (fontPath == SYSTEM_FONT_URI) {
             Typeface.DEFAULT
         } else if (fontPath.startsWith(ASSET_PATH)) {
             Typeface.createFromAsset(assets, fontPath.substring(ASSET_PATH.length))
