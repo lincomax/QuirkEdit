@@ -21,6 +21,42 @@ import com.blacksquircle.ui.feature.themes.domain.model.ColorModel
 
 internal object EditorTheme {
 
+    val SQUICK_LIGHT = ColorModel(
+        textColor = Color.parseColor("#24292E"),
+        backgroundColor = Color.parseColor("#FFFFFF"),
+        numberColor = Color.parseColor("#005CC5"),
+        operatorColor = Color.parseColor("#005CC5"),
+        keywordColor = Color.parseColor("#D73A49"),
+        variableColor = Color.parseColor("#005CC5"),
+        functionColor = Color.parseColor("#6F42C1"),
+        stringColor = Color.parseColor("#032F62"),
+        commentColor = Color.parseColor("#6A737D"),
+    )
+
+    val SQUICK_DARK = ColorModel(
+        textColor = Color.parseColor("#F8F8F8"),
+        backgroundColor = Color.parseColor("#303030"),
+        numberColor = Color.parseColor("#3387CC"),
+        operatorColor = Color.parseColor("#F8F8F8"),
+        keywordColor = Color.parseColor("#E28964"),
+        variableColor = Color.parseColor("#3E87E3"),
+        functionColor = Color.parseColor("#89BDFF"),
+        stringColor = Color.parseColor("#65B042"),
+        commentColor = Color.parseColor("#AEAEAE"),
+    )
+
+    val SQUICK_BLACK = ColorModel(
+        textColor = Color.parseColor("#E0E2E4"),
+        backgroundColor = Color.parseColor("#000000"),
+        numberColor = Color.parseColor("#FFCD22"),
+        operatorColor = Color.parseColor("#E0E2E4"),
+        keywordColor = Color.parseColor("#93C763"),
+        variableColor = Color.parseColor("#8CBBAD"),
+        functionColor = Color.parseColor("#FFCD22"),
+        stringColor = Color.parseColor("#EC7600"),
+        commentColor = Color.parseColor("#818E96"),
+    )
+
     val DARCULA = ColorModel(
         textColor = Color.parseColor("#ABB7C5"),
         backgroundColor = Color.parseColor("#1E1F22"),

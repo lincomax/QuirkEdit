@@ -1,0 +1,60 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup signing key
+        env:
+          SIGNING_KEYSTORE: ${{ secrets.SIGNING_KEYSTORE }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          if [ -z "$SIGNING_KEYSTORE" ] || [ -z "$SIGNING_PASSWORD" ]; then
+            echo "::error::Add the SIGNING_KEYSTORE and SIGNING_PASSWORD secrets (Settings > Secrets and variables > Actions) before building."
+            exit 1
+          fi
+          echo "$SIGNING_KEYSTORE" | base64 -d > app/keystore.jks
+          {
+            echo "KEYSTORE_PATH=keystore.jks"
+            echo "KEYSTORE_PASSWORD=$SIGNING_PASSWORD"
+            echo "KEY_ALIAS=squickedit"
+            echo "KEY_PASSWORD=$SIGNING_PASSWORD"
+          } > local.properties
+
+      - name: Build release APK (FOSS)
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleFossRelease --no-configuration-cache
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SquickEdit
+          path: app/build/outputs/apk/foss/release/*.apk
+
+      - name: Delete keystore
+        if: always()
+        run: rm -f app/keystore.jks local.properties

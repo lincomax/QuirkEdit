@@ -21,6 +21,21 @@ internal enum class AssetsTheme(
     val themeName: String,
     val themeUri: String,
 ) {
+    THEME_SQUICK_LIGHT(
+        themeId = "squick_light",
+        themeName = "Light",
+        themeUri = "file:///android_asset/themes/squick_light.json",
+    ),
+    THEME_SQUICK_DARK(
+        themeId = "squick_dark",
+        themeName = "Dark",
+        themeUri = "file:///android_asset/themes/squick_dark.json",
+    ),
+    THEME_SQUICK_BLACK(
+        themeId = "squick_black",
+        themeName = "Black",
+        themeUri = "file:///android_asset/themes/squick_black.json",
+    ),
     THEME_DARCULA(
         themeId = "darcula",
         themeName = "Darcula",

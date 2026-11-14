@@ -33,21 +33,27 @@ import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.EditMenu
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.FileMenu
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.GitMenu
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.OtherMenu
-import com.blacksquircle.ui.feature.editor.ui.editor.compose.menu.ToolsMenu
 import com.blacksquircle.ui.feature.editor.ui.editor.model.DocumentState
+import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorSettings
 import com.blacksquircle.ui.feature.editor.ui.editor.model.MenuType
 import com.blacksquircle.ui.ds.R as UiR
 
+/**
+ * Toolbar: drawer button on the left,
+ * and three menus on the right: File, Edit and More.
+ */
 @Composable
 internal fun EditorToolbar(
     currentDocument: DocumentState?,
     modifier: Modifier = Modifier,
+    settings: EditorSettings = EditorSettings(),
     onDrawerClicked: () -> Unit = {},
     onNewFileClicked: () -> Unit = {},
     onOpenFileClicked: () -> Unit = {},
     onSaveFileClicked: () -> Unit = {},
     onSaveFileAsClicked: () -> Unit = {},
     onReloadFileClicked: () -> Unit = {},
+    onCloseFileClicked: () -> Unit = {},
     onCutClicked: () -> Unit = {},
     onCopyClicked: () -> Unit = {},
     onPasteClicked: () -> Unit = {},
@@ -58,6 +64,7 @@ internal fun EditorToolbar(
     onUndoClicked: () -> Unit = {},
     onRedoClicked: () -> Unit = {},
     onFindClicked: () -> Unit = {},
+    onGoToLineClicked: () -> Unit = {},
     onForceSyntaxClicked: () -> Unit = {},
     onInsertColorClicked: () -> Unit = {},
     onFetchClicked: () -> Unit = {},
@@ -67,6 +74,9 @@ internal fun EditorToolbar(
     onCheckoutClicked: () -> Unit = {},
     onTerminalClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
+    onMiniToolbarClicked: () -> Unit = {},
+    onWordWrapClicked: () -> Unit = {},
+    onReadOnlyClicked: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     var menuType by rememberSaveable {
@@ -78,7 +88,7 @@ internal fun EditorToolbar(
         onNavigationClicked = onDrawerClicked,
         navigationActions = {
             IconButton(
-                iconResId = UiR.drawable.ic_folder,
+                iconResId = UiR.drawable.ic_file,
                 onClick = { menuType = MenuType.FILE },
                 contentDescription = stringResource(R.string.editor_menu_file),
                 anchor = {
@@ -90,6 +100,7 @@ internal fun EditorToolbar(
                         onSaveFileClicked = { menuType = null; onSaveFileClicked() },
                         onSaveFileAsClicked = { menuType = null; onSaveFileAsClicked() },
                         onReloadFileClicked = { menuType = null; onReloadFileClicked() },
+                        onCloseFileClicked = { menuType = null; onCloseFileClicked() },
                     )
                 }
             )
@@ -101,6 +112,10 @@ internal fun EditorToolbar(
                     EditMenu(
                         expanded = menuType == MenuType.EDIT,
                         onDismiss = { menuType = null },
+                        canUndo = currentDocument?.canUndo ?: false,
+                        canRedo = currentDocument?.canRedo ?: false,
+                        onUndoClicked = { menuType = null; onUndoClicked() },
+                        onRedoClicked = { menuType = null; onRedoClicked() },
                         onCutClicked = { menuType = null; onCutClicked() },
                         onCopyClicked = { menuType = null; onCopyClicked() },
                         onPasteClicked = { menuType = null; onPasteClicked() },
@@ -108,36 +123,25 @@ internal fun EditorToolbar(
                         onSelectLineClicked = { menuType = null; onSelectLineClicked() },
                         onDeleteLineClicked = { menuType = null; onDeleteLineClicked() },
                         onDuplicateLineClicked = { menuType = null; onDuplicateLineClicked() },
+                        onInsertColorClicked = { menuType = null; onInsertColorClicked() },
                     )
                 }
             )
-
-            IconButton(
-                iconResId = UiR.drawable.ic_undo,
-                onClick = onUndoClicked,
-                enabled = currentDocument?.canUndo ?: false,
-                debounce = false,
-                contentDescription = stringResource(R.string.editor_menu_edit_undo)
-            )
-            IconButton(
-                iconResId = UiR.drawable.ic_redo,
-                onClick = onRedoClicked,
-                enabled = currentDocument?.canRedo ?: false,
-                debounce = false,
-                contentDescription = stringResource(R.string.editor_menu_edit_redo)
-            )
-
             IconButton(
                 iconResId = UiR.drawable.ic_dots_vertical,
                 onClick = { menuType = MenuType.OTHER },
-                contentDescription = stringResource(UiR.string.common_menu),
+                contentDescription = stringResource(R.string.editor_menu_more),
                 anchor = {
                     OtherMenu(
                         showGit = currentDocument?.document?.gitRepository != null,
                         expanded = menuType == MenuType.OTHER,
                         onDismiss = { menuType = null },
+                        miniToolbar = settings.miniToolbar,
+                        wordWrap = settings.wordWrap,
+                        readOnly = settings.readOnly,
                         onFindClicked = { menuType = null; onFindClicked() },
-                        onToolsClicked = { menuType = MenuType.TOOLS },
+                        onGoToLineClicked = { menuType = null; onGoToLineClicked() },
+                        onForceSyntaxClicked = { menuType = null; onForceSyntaxClicked() },
                         onGitClicked = { menuType = MenuType.GIT },
                         onTerminalClicked = {
                             focusManager.clearFocus(force = true)
@@ -149,12 +153,9 @@ internal fun EditorToolbar(
                             menuType = null
                             onSettingsClicked()
                         },
-                    )
-                    ToolsMenu(
-                        expanded = menuType == MenuType.TOOLS,
-                        onDismiss = { menuType = null },
-                        onForceSyntaxClicked = { menuType = null; onForceSyntaxClicked() },
-                        onInsertColorClicked = { menuType = null; onInsertColorClicked() },
+                        onMiniToolbarClicked = { menuType = null; onMiniToolbarClicked() },
+                        onWordWrapClicked = { menuType = null; onWordWrapClicked() },
+                        onReadOnlyClicked = { menuType = null; onReadOnlyClicked() },
                     )
                     GitMenu(
                         expanded = menuType == MenuType.GIT,

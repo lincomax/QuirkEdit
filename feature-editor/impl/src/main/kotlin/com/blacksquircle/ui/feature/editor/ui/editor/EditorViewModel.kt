@@ -239,6 +239,22 @@ internal class EditorViewModel @Inject constructor(
         settingsManager.readOnly = settings.readOnly
     }
 
+    fun onWordWrapClicked() {
+        settings = settings.copy(wordWrap = !settings.wordWrap)
+        _viewState.update {
+            it.copy(settings = settings)
+        }
+        settingsManager.wordWrap = settings.wordWrap
+    }
+
+    fun onMiniToolbarClicked() {
+        settings = settings.copy(miniToolbar = !settings.miniToolbar)
+        _viewState.update {
+            it.copy(settings = settings)
+        }
+        settingsManager.miniToolbar = settings.miniToolbar
+    }
+
     fun onCloseFileClicked() {
         if (selectedPosition !in documents.indices) {
             return
@@ -655,7 +671,7 @@ internal class EditorViewModel @Inject constructor(
         }
     }
 
-    private fun onGoToLineClicked() {
+    fun onGoToLineClicked() {
         if (selectedPosition !in documents.indices) {
             return
         }
@@ -1417,6 +1433,7 @@ internal class EditorViewModel @Inject constructor(
         showInvisibleChars = settingsManager.showInvisibleChars,
         readOnly = settingsManager.readOnly,
         extendedKeyboard = settingsManager.extendedKeyboard,
+        miniToolbar = settingsManager.miniToolbar,
         keyboardPreset = settingsManager.keyboardPreset.toMutableList().distinct(),
         softKeyboard = settingsManager.softKeyboard,
         autoIndentation = settingsManager.autoIndentation,

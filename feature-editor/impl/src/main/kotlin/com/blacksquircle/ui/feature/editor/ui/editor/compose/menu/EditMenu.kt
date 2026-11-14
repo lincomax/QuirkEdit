@@ -30,6 +30,10 @@ internal fun EditMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    canUndo: Boolean = false,
+    canRedo: Boolean = false,
+    onUndoClicked: () -> Unit = {},
+    onRedoClicked: () -> Unit = {},
     onCutClicked: () -> Unit = {},
     onCopyClicked: () -> Unit = {},
     onPasteClicked: () -> Unit = {},
@@ -37,14 +41,31 @@ internal fun EditMenu(
     onSelectLineClicked: () -> Unit = {},
     onDeleteLineClicked: () -> Unit = {},
     onDuplicateLineClicked: () -> Unit = {},
+    onInsertColorClicked: () -> Unit = {},
 ) {
     PopupMenu(
         expanded = expanded,
         onDismiss = onDismiss,
         verticalOffset = (-56).dp,
-        horizontalOffset = 180.dp,
         modifier = modifier,
     ) {
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_edit_undo),
+            iconResId = UiR.drawable.ic_undo,
+            onClick = onUndoClicked,
+            enabled = canUndo,
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_edit_redo),
+            iconResId = UiR.drawable.ic_redo,
+            onClick = onRedoClicked,
+            enabled = canRedo,
+        )
+        PopupMenuItem(
+            title = stringResource(android.R.string.selectAll),
+            iconResId = UiR.drawable.ic_select_all,
+            onClick = onSelectAllClicked,
+        )
         PopupMenuItem(
             title = stringResource(android.R.string.cut),
             iconResId = UiR.drawable.ic_cut,
@@ -61,11 +82,6 @@ internal fun EditMenu(
             onClick = onPasteClicked,
         )
         PopupMenuItem(
-            title = stringResource(android.R.string.selectAll),
-            iconResId = UiR.drawable.ic_select_all,
-            onClick = onSelectAllClicked,
-        )
-        PopupMenuItem(
             title = stringResource(R.string.editor_menu_edit_select_line),
             iconResId = UiR.drawable.ic_line_select,
             onClick = onSelectLineClicked,
@@ -79,6 +95,11 @@ internal fun EditMenu(
             title = stringResource(R.string.editor_menu_edit_duplicate_line),
             iconResId = UiR.drawable.ic_line_duplicate,
             onClick = onDuplicateLineClicked,
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_tools_insert_color),
+            iconResId = UiR.drawable.ic_palette,
+            onClick = onInsertColorClicked,
         )
     }
 }

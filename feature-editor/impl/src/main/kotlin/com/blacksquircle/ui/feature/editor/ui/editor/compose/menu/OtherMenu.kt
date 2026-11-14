@@ -20,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.blacksquircle.ui.ds.checkbox.CheckBox
+import com.blacksquircle.ui.ds.divider.HorizontalDivider
 import com.blacksquircle.ui.ds.popupmenu.PopupMenu
 import com.blacksquircle.ui.ds.popupmenu.PopupMenuItem
 import com.blacksquircle.ui.feature.editor.R
@@ -31,37 +33,48 @@ internal fun OtherMenu(
     expanded: Boolean,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    miniToolbar: Boolean = true,
+    wordWrap: Boolean = false,
+    readOnly: Boolean = false,
     onFindClicked: () -> Unit = {},
-    onToolsClicked: () -> Unit = {},
+    onGoToLineClicked: () -> Unit = {},
+    onForceSyntaxClicked: () -> Unit = {},
     onGitClicked: () -> Unit = {},
     onTerminalClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
+    onMiniToolbarClicked: () -> Unit = {},
+    onWordWrapClicked: () -> Unit = {},
+    onReadOnlyClicked: () -> Unit = {},
 ) {
     PopupMenu(
         expanded = expanded,
         onDismiss = onDismiss,
         verticalOffset = (-56).dp,
-        horizontalOffset = 200.dp,
         modifier = modifier,
     ) {
         PopupMenuItem(
-            title = stringResource(R.string.editor_menu_find),
-            iconResId = UiR.drawable.ic_file_find,
+            title = stringResource(R.string.editor_menu_search),
+            iconResId = UiR.drawable.ic_search,
             onClick = onFindClicked,
         )
         PopupMenuItem(
-            title = stringResource(R.string.editor_menu_tools),
-            iconResId = UiR.drawable.ic_wrench,
-            onClick = onToolsClicked,
-            submenu = true,
+            title = stringResource(R.string.editor_menu_goto_line),
+            iconResId = UiR.drawable.ic_goto_line,
+            onClick = onGoToLineClicked,
         )
         PopupMenuItem(
-            title = stringResource(R.string.editor_menu_git),
-            iconResId = UiR.drawable.ic_git,
-            onClick = onGitClicked,
-            enabled = showGit,
-            submenu = true,
+            title = stringResource(R.string.editor_menu_syntax),
+            iconResId = UiR.drawable.ic_syntax,
+            onClick = onForceSyntaxClicked,
         )
+        if (showGit) {
+            PopupMenuItem(
+                title = stringResource(R.string.editor_menu_git),
+                iconResId = UiR.drawable.ic_git,
+                onClick = onGitClicked,
+                submenu = true,
+            )
+        }
         PopupMenuItem(
             title = stringResource(R.string.editor_menu_terminal),
             iconResId = UiR.drawable.ic_console,
@@ -71,6 +84,25 @@ internal fun OtherMenu(
             title = stringResource(R.string.editor_menu_settings),
             iconResId = UiR.drawable.ic_settings,
             onClick = onSettingsClicked,
+        )
+        HorizontalDivider()
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_mini_toolbar),
+            iconResId = UiR.drawable.ic_mini_toolbar,
+            onClick = onMiniToolbarClicked,
+            trailing = { CheckBox(checked = miniToolbar, onClick = onMiniToolbarClicked) },
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_word_wrap),
+            iconResId = UiR.drawable.ic_wrap,
+            onClick = onWordWrapClicked,
+            trailing = { CheckBox(checked = wordWrap, onClick = onWordWrapClicked) },
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_file_read_only),
+            iconResId = UiR.drawable.ic_lock,
+            onClick = onReadOnlyClicked,
+            trailing = { CheckBox(checked = readOnly, onClick = onReadOnlyClicked) },
         )
     }
 }

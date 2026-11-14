@@ -19,7 +19,6 @@ package com.blacksquircle.ui.feature.editor.ui.editor.model
 internal enum class MenuType {
     FILE,
     EDIT,
-    TOOLS,
     GIT,
     OTHER,
 }

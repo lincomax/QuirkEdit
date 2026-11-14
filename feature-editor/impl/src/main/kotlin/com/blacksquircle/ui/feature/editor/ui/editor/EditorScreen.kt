@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -35,10 +36,12 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,6 +69,7 @@ import com.blacksquircle.ui.feature.editor.ui.editor.compose.DocumentTabLayout
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.EditorToolbar
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.ErrorStatus
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.ExtendedKeyboard
+import com.blacksquircle.ui.feature.editor.ui.editor.compose.MiniToolbar
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.SearchPanel
 import com.blacksquircle.ui.feature.editor.ui.editor.model.DocumentState
 import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorController
@@ -115,6 +119,10 @@ internal fun EditorScreen(
         onSaveFileAsClicked = viewModel::onSaveFileAsClicked,
         onReloadFileClicked = viewModel::onReloadFileClicked,
         onReadOnlyClicked = viewModel::onReadOnlyClicked,
+        onWordWrapClicked = viewModel::onWordWrapClicked,
+        onMiniToolbarClicked = viewModel::onMiniToolbarClicked,
+        onCloseFileClicked = viewModel::onCloseFileClicked,
+        onGoToLineClicked = viewModel::onGoToLineClicked,
         onContentChanged = viewModel::onContentChanged,
         onShortcutPressed = viewModel::onShortcutPressed,
         onCutClicked = viewModel::onCutClicked,
@@ -266,6 +274,10 @@ private fun EditorScreen(
     onSaveFileAsClicked: () -> Unit = {},
     onReloadFileClicked: () -> Unit = {},
     onReadOnlyClicked: () -> Unit = {},
+    onWordWrapClicked: () -> Unit = {},
+    onMiniToolbarClicked: () -> Unit = {},
+    onCloseFileClicked: () -> Unit = {},
+    onGoToLineClicked: () -> Unit = {},
     onContentChanged: () -> Unit = {},
     onShortcutPressed: (Boolean, Boolean, Boolean, Int) -> Unit = { _, _, _, _ -> },
     onCutClicked: () -> Unit = {},
@@ -310,12 +322,14 @@ private fun EditorScreen(
         topBar = {
             EditorToolbar(
                 currentDocument = viewState.currentDocument,
+                settings = viewState.settings,
                 onDrawerClicked = onDrawerClicked,
                 onNewFileClicked = onNewFileClicked,
                 onOpenFileClicked = onOpenFileClicked,
                 onSaveFileClicked = onSaveFileClicked,
                 onSaveFileAsClicked = onSaveFileAsClicked,
                 onReloadFileClicked = onReloadFileClicked,
+                onCloseFileClicked = onCloseFileClicked,
                 onCutClicked = onCutClicked,
                 onCopyClicked = onCopyClicked,
                 onPasteClicked = onPasteClicked,
@@ -326,6 +340,7 @@ private fun EditorScreen(
                 onUndoClicked = onUndoClicked,
                 onRedoClicked = onRedoClicked,
                 onFindClicked = onToggleFindClicked,
+                onGoToLineClicked = onGoToLineClicked,
                 onForceSyntaxClicked = onForceSyntaxClicked,
                 onInsertColorClicked = onInsertColorClicked,
                 onFetchClicked = onFetchClicked,
@@ -335,6 +350,304 @@ private fun EditorScreen(
                 onCheckoutClicked = onCheckoutClicked,
                 onTerminalClicked = onTerminalClicked,
                 onSettingsClicked = onSettingsClicked,
+                onMiniToolbarClicked = onMiniToolbarClicked,
+                onWordWrapClicked = onWordWrapClicked,
+                onReadOnlyClicked = onReadOnlyClicked,
+            )
+        },
+        bottomBar = {
+            val showMiniToolbar = viewState.settings.miniToolbar && !viewState.isLoading
+            if (showMiniToolbar || viewState.showExtendedKeyboard) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .shadow(16.dp)
+                        .navigationBarsPadding()
+                ) {
+                    if (viewState.showExtendedKeyboard) {
+                        ExtendedKeyboard(
+                            currentDocument = viewState.currentDocument,
+                            preset = viewState.settings.keyboardPreset,
+                            showExtraKeys = viewState.showExtraKeys,
+                            readOnly = viewState.settings.readOnly,
+                            onExtraKeyClicked = onExtraKeyClicked,
+                            onExtraOptionsClicked = onExtraOptionsClicked,
+                            onSaveFileClicked = onSaveFileClicked,
+                            onReadOnlyClicked = onReadOnlyClicked,
+                            onUndoClicked = onUndoClicked,
+                            onRedoClicked = onRedoClicked,
+                        )
+                    }
+                    if (showMiniToolbar) {
+                        if (viewState.showExtendedKeyboard) {
+                            HorizontalDivider()
+                        }
+                        MiniToolbar(
+                            currentDocument = viewState.currentDocument,
+                            onOpenFileClicked = onOpenFileClicked,
+                            onPasteClicked = onPasteClicked,
+                            onUndoClicked = onUndoClicked,
+                            onRedoClicked = onRedoClicked,
+                            onFindClicked = onToggleFindClicked,
+                            onSaveFileClicked = onSaveFileClicked,
+                            onCloseFileClicked = onCloseFileClicked,
+                        )
+                    }
+                }
+            }
+        },
+        drawerState = drawerState,
+        tabsState = tabsState,
+        editorController = editorController,
+        onDrawerClicked = {
+            scope.launch {
+                if (drawerState.isOpen) {
+                    drawerState.close()
+                } else {
+                    drawerState.open()
+                }
+            }
+        },
+        onNewFileClicked = viewModel::onNewFileClicked,
+        onOpenFileClicked = viewModel::onOpenFileClicked,
+        onSaveFileClicked = viewModel::onSaveFileClicked,
+        onSaveFileAsClicked = viewModel::onSaveFileAsClicked,
+        onReloadFileClicked = viewModel::onReloadFileClicked,
+        onReadOnlyClicked = viewModel::onReadOnlyClicked,
+        onWordWrapClicked = viewModel::onWordWrapClicked,
+        onMiniToolbarClicked = viewModel::onMiniToolbarClicked,
+        onCloseFileClicked = viewModel::onCloseFileClicked,
+        onGoToLineClicked = viewModel::onGoToLineClicked,
+        onContentChanged = viewModel::onContentChanged,
+        onShortcutPressed = viewModel::onShortcutPressed,
+        onCutClicked = viewModel::onCutClicked,
+        onCopyClicked = viewModel::onCopyClicked,
+        onPasteClicked = viewModel::onPasteClicked,
+        onSelectAllClicked = viewModel::onSelectAllClicked,
+        onSelectLineClicked = viewModel::onSelectLineClicked,
+        onDeleteLineClicked = viewModel::onDeleteLineClicked,
+        onDuplicateLineClicked = viewModel::onDuplicateLineClicked,
+        onUndoClicked = viewModel::onUndoClicked,
+        onRedoClicked = viewModel::onRedoClicked,
+        onToggleFindClicked = viewModel::onToggleFindClicked,
+        onToggleReplaceClicked = viewModel::onToggleReplaceClicked,
+        onFindTextChanged = viewModel::onFindTextChanged,
+        onReplaceTextChanged = viewModel::onReplaceTextChanged,
+        onRegexClicked = viewModel::onRegexClicked,
+        onMatchCaseClicked = viewModel::onMatchCaseClicked,
+        onWordsOnlyClicked = viewModel::onWordsOnlyClicked,
+        onPreviousMatchClicked = viewModel::onPreviousMatchClicked,
+        onNextMatchClicked = viewModel::onNextMatchClicked,
+        onReplaceMatchClicked = viewModel::onReplaceMatchClicked,
+        onReplaceAllClicked = viewModel::onReplaceAllClicked,
+        onForceSyntaxClicked = viewModel::onForceSyntaxClicked,
+        onInsertColorClicked = viewModel::onInsertColorClicked,
+        onFetchClicked = viewModel::onFetchClicked,
+        onPullClicked = viewModel::onPullClicked,
+        onCommitClicked = viewModel::onCommitClicked,
+        onPushClicked = viewModel::onPushClicked,
+        onCheckoutClicked = viewModel::onCheckoutClicked,
+        onTerminalClicked = viewModel::onTerminalClicked,
+        onSettingsClicked = viewModel::onSettingsClicked,
+        onDocumentClicked = viewModel::onDocumentClicked,
+        onDocumentMoved = viewModel::onDocumentMoved,
+        onCloseClicked = viewModel::onCloseClicked,
+        onCloseOthersClicked = viewModel::onCloseOthersClicked,
+        onCloseAllClicked = viewModel::onCloseAllClicked,
+        onErrorActionClicked = viewModel::onErrorActionClicked,
+        onExtraKeyClicked = viewModel::onExtraKeyClicked,
+        onExtraOptionsClicked = viewModel::onExtraOptionsClicked,
+    )
+
+    val defaultFileName = stringResource(UiR.string.common_untitled)
+    val newFileContract = rememberCreateFileContract(MimeType.TEXT) { result ->
+        when (result) {
+            is ContractResult.Success -> viewModel.onFileOpened(result.uri)
+            is ContractResult.Canceled -> Unit
+        }
+    }
+    val openFileContract = rememberOpenFileContract { result ->
+        when (result) {
+            is ContractResult.Success -> viewModel.onFileOpened(result.uri)
+            is ContractResult.Canceled -> Unit
+        }
+    }
+    val saveFileContract = rememberCreateFileContract(MimeType.TEXT) { result ->
+        when (result) {
+            is ContractResult.Success -> viewModel.onSaveFileSelected(result.uri)
+            is ContractResult.Canceled -> Unit
+        }
+    }
+
+    val activity = LocalActivity.current
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.viewEvent.collect { event ->
+            when (event) {
+                is ViewEvent.Toast -> {
+                    context.showToast(text = event.message)
+                }
+                is EditorViewEvent.Finish -> {
+                    activity?.finish()
+                }
+                is EditorViewEvent.ScrollToEnd -> {
+                    tabsState.animateScrollToItem(viewState.documents.size)
+                }
+                is EditorViewEvent.CreateFileContract -> {
+                    newFileContract.launch(defaultFileName)
+                }
+                is EditorViewEvent.OpenFileContract -> {
+                    openFileContract.launch(arrayOf(MimeType.ANY))
+                }
+                is EditorViewEvent.SaveAsFileContract -> {
+                    saveFileContract.launch(event.fileName)
+                }
+                is EditorViewEvent.Command -> {
+                    scope.launch {
+                        editorController.send(event.command)
+                    }
+                }
+            }
+        }
+    }
+
+    ResultEffect<String>(KEY_CLOSE_FILE) { fileUuid ->
+        viewModel.onCloseModifiedClicked(fileUuid)
+    }
+    ResultEffect<String>(KEY_SELECT_LANGUAGE) { language ->
+        viewModel.onLanguageChanged(language)
+    }
+    ResultEffect<Int>(KEY_GOTO_LINE) { lineNumber ->
+        viewModel.onLineSelected(lineNumber)
+    }
+    ResultEffect<Int>(KEY_INSERT_COLOR) { color ->
+        viewModel.onColorSelected(color)
+    }
+    ResultEffect<Unit>(KEY_PULL) {
+        viewModel.onReloadFileClicked()
+    }
+    ResultEffect<Unit>(KEY_CHECKOUT) {
+        viewModel.onReloadFileClicked()
+    }
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.onResumed()
+    }
+    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+        viewModel.onPaused()
+    }
+
+    BackHandler {
+        if (drawerState.isOpen) {
+            scope.launch {
+                drawerState.close()
+            }
+        } else {
+            viewModel.onBackClicked()
+        }
+    }
+
+    CleanupEffect {
+        EditorComponent.release()
+    }
+
+    ReportDrawnWhen {
+        !viewState.isLoading
+    }
+}
+
+@Composable
+private fun EditorScreen(
+    viewState: EditorViewState,
+    editorController: EditorController,
+    drawerState: DrawerState,
+    tabsState: LazyListState,
+    onDrawerClicked: () -> Unit = {},
+    onNewFileClicked: () -> Unit = {},
+    onOpenFileClicked: () -> Unit = {},
+    onSaveFileClicked: () -> Unit = {},
+    onSaveFileAsClicked: () -> Unit = {},
+    onReloadFileClicked: () -> Unit = {},
+    onReadOnlyClicked: () -> Unit = {},
+    onWordWrapClicked: () -> Unit = {},
+    onMiniToolbarClicked: () -> Unit = {},
+    onCloseFileClicked: () -> Unit = {},
+    onGoToLineClicked: () -> Unit = {},
+    onContentChanged: () -> Unit = {},
+    onShortcutPressed: (Boolean, Boolean, Boolean, Int) -> Unit = { _, _, _, _ -> },
+    onCutClicked: () -> Unit = {},
+    onCopyClicked: () -> Unit = {},
+    onPasteClicked: () -> Unit = {},
+    onSelectAllClicked: () -> Unit = {},
+    onSelectLineClicked: () -> Unit = {},
+    onDeleteLineClicked: () -> Unit = {},
+    onDuplicateLineClicked: () -> Unit = {},
+    onUndoClicked: () -> Unit = {},
+    onRedoClicked: () -> Unit = {},
+    onToggleFindClicked: () -> Unit = {},
+    onToggleReplaceClicked: () -> Unit = {},
+    onFindTextChanged: (String) -> Unit = {},
+    onReplaceTextChanged: (String) -> Unit = {},
+    onRegexClicked: () -> Unit = {},
+    onMatchCaseClicked: () -> Unit = {},
+    onWordsOnlyClicked: () -> Unit = {},
+    onPreviousMatchClicked: () -> Unit = {},
+    onNextMatchClicked: () -> Unit = {},
+    onReplaceMatchClicked: () -> Unit = {},
+    onReplaceAllClicked: () -> Unit = {},
+    onForceSyntaxClicked: () -> Unit = {},
+    onInsertColorClicked: () -> Unit = {},
+    onFetchClicked: () -> Unit = {},
+    onPullClicked: () -> Unit = {},
+    onCommitClicked: () -> Unit = {},
+    onPushClicked: () -> Unit = {},
+    onCheckoutClicked: () -> Unit = {},
+    onTerminalClicked: () -> Unit = {},
+    onSettingsClicked: () -> Unit = {},
+    onDocumentClicked: (DocumentModel) -> Unit = {},
+    onDocumentMoved: (from: Int, to: Int) -> Unit = { _, _ -> },
+    onCloseClicked: (DocumentModel) -> Unit = {},
+    onCloseOthersClicked: (DocumentModel) -> Unit = {},
+    onCloseAllClicked: () -> Unit = {},
+    onErrorActionClicked: (ErrorAction) -> Unit = {},
+    onExtraKeyClicked: (Char) -> Unit = {},
+    onExtraOptionsClicked: () -> Unit = {},
+) {
+    ScaffoldSuite(
+        topBar = {
+            EditorToolbar(
+                currentDocument = viewState.currentDocument,
+                settings = viewState.settings,
+                onDrawerClicked = onDrawerClicked,
+                onNewFileClicked = onNewFileClicked,
+                onOpenFileClicked = onOpenFileClicked,
+                onSaveFileClicked = onSaveFileClicked,
+                onSaveFileAsClicked = onSaveFileAsClicked,
+                onReloadFileClicked = onReloadFileClicked,
+                onCloseFileClicked = onCloseFileClicked,
+                onCutClicked = onCutClicked,
+                onCopyClicked = onCopyClicked,
+                onPasteClicked = onPasteClicked,
+                onSelectAllClicked = onSelectAllClicked,
+                onSelectLineClicked = onSelectLineClicked,
+                onDeleteLineClicked = onDeleteLineClicked,
+                onDuplicateLineClicked = onDuplicateLineClicked,
+                onUndoClicked = onUndoClicked,
+                onRedoClicked = onRedoClicked,
+                onFindClicked = onToggleFindClicked,
+                onGoToLineClicked = onGoToLineClicked,
+                onForceSyntaxClicked = onForceSyntaxClicked,
+                onInsertColorClicked = onInsertColorClicked,
+                onFetchClicked = onFetchClicked,
+                onPullClicked = onPullClicked,
+                onCommitClicked = onCommitClicked,
+                onPushClicked = onPushClicked,
+                onCheckoutClicked = onCheckoutClicked,
+                onTerminalClicked = onTerminalClicked,
+                onSettingsClicked = onSettingsClicked,
+                onMiniToolbarClicked = onMiniToolbarClicked,
+                onWordWrapClicked = onWordWrapClicked,
+                onReadOnlyClicked = onReadOnlyClicked,
             )
         },
         bottomBar = {

@@ -29,8 +29,10 @@ android {
 
     defaultConfig {
         applicationId = "com.blacksquircle.ui"
+        // Installs alongside the official Squircle CE
+        applicationIdSuffix = ".squickedit"
         versionCode = 10028
-        versionName = "2025.1.3"
+        versionName = "2025.1.3-squickedit"
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true

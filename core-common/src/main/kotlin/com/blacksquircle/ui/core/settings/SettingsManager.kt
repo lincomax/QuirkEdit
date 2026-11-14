@@ -54,6 +54,7 @@ class SettingsManager(private val context: Context) {
 
         // Keyboard
         const val KEY_USE_EXTENDED_KEYBOARD = "use_extended_keyboard"
+        const val KEY_MINI_TOOLBAR = "mini_toolbar"
         const val KEY_KEYBOARD_PRESET = "keyboard_preset"
         const val KEY_SOFT_KEYBOARD = "soft_keyboard"
 
@@ -103,7 +104,7 @@ class SettingsManager(private val context: Context) {
             .also { _sharedPreferences = it }
 
     var editorTheme: String
-        get() = sharedPreferences.getString(KEY_EDITOR_THEME, "darcula") ?: "darcula"
+        get() = sharedPreferences.getString(KEY_EDITOR_THEME, "squick_dark") ?: "squick_dark"
         set(value) = sharedPreferences.edit().putString(KEY_EDITOR_THEME, value).apply()
     var fullScreenMode: Boolean
         get() = sharedPreferences.getBoolean(KEY_FULLSCREEN_MODE, false)
@@ -117,7 +118,7 @@ class SettingsManager(private val context: Context) {
         get() = sharedPreferences.getInt(KEY_FONT_SIZE, 14)
         set(value) = sharedPreferences.edit().putInt(KEY_FONT_SIZE, value).apply()
     var fontType: String
-        get() = sharedPreferences.getString(KEY_FONT_TYPE, "jetbrains_mono") ?: "jetbrains_mono"
+        get() = sharedPreferences.getString(KEY_FONT_TYPE, "droid_sans_mono") ?: "droid_sans_mono"
         set(value) = sharedPreferences.edit().putString(KEY_FONT_TYPE, value).apply()
 
     var wordWrap: Boolean
@@ -161,6 +162,9 @@ class SettingsManager(private val context: Context) {
     var extendedKeyboard: Boolean
         get() = sharedPreferences.getBoolean(KEY_USE_EXTENDED_KEYBOARD, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_USE_EXTENDED_KEYBOARD, value).apply()
+    var miniToolbar: Boolean
+        get() = sharedPreferences.getBoolean(KEY_MINI_TOOLBAR, true)
+        set(value) = sharedPreferences.edit().putBoolean(KEY_MINI_TOOLBAR, value).apply()
     var keyboardPreset: String
         get() = sharedPreferences.getString(KEY_KEYBOARD_PRESET, "{}();,.=|&![]<>+-/*?:_") ?: "{}();,.=|&![]<>+-/*?:_"
         set(value) = sharedPreferences.edit().putString(KEY_KEYBOARD_PRESET, value).apply()

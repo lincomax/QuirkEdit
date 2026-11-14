@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -33,7 +32,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -75,13 +73,11 @@ internal fun ExtendedKeyboard(
 ) {
     LazyRow(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-        contentPadding = PaddingValues(6.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp),
         modifier = modifier
             .fillMaxWidth()
-            .shadow(16.dp)
             .background(SquircleTheme.colors.colorBackgroundSecondary)
-            .navigationBarsPadding()
     ) {
         item(
             key = ItemOptions,
@@ -193,9 +189,8 @@ private fun ExtraKey(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(48.dp, 32.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .background(SquircleTheme.colors.colorBackgroundTertiary)
+            .size(40.dp, 36.dp)
+            .clip(RoundedCornerShape(4.dp))
             .debounceClickable(
                 enabled = enabled,
                 debounce = debounce,
