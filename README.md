@@ -2,7 +2,7 @@
 
 <img src=".github/images/svg/ic_launcher_round_api_24.svg" alt="SquickEdit" width="120" align="left">
 
-A simple, fast text and code editor for Android, based on [Squircle CE](https://github.com/massivemadness/Squircle-CE).
+A text and code editor for Android, based on [Squircle CE](https://github.com/massivemadness/Squircle-CE).
 
 <br clear="left">
 
@@ -11,10 +11,10 @@ A simple, fast text and code editor for Android, based on [Squircle CE](https://
 
 * Tabs for multiple open files, with unsaved files marked `*name`
 * File, Edit and More menus, plus a bottom toolbar for common actions
-* Light, Dark and Black themes with syntax highlighting
+* Light, Dark, and Black themes with syntax highlighting
 * Word wrap, read-only mode, go to line, search and statistics
 * Asks to reload a file when another app changes it
-* Optional symbol bar, magnifier and haptic feedback
+* Optional symbol bar, magnifier, and haptic feedback
 
 ## Download
 
