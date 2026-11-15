@@ -56,6 +56,7 @@ class SettingsManager(private val context: Context) {
         const val KEY_USE_EXTENDED_KEYBOARD = "use_extended_keyboard"
         const val KEY_MINI_TOOLBAR = "mini_toolbar"
         const val KEY_MAGNIFIER = "magnifier"
+        const val KEY_CURSOR_HAPTICS = "cursor_haptics"
         const val KEY_HIGHLIGHT_COLOR = "highlight_color"
         const val KEY_KEYBOARD_PRESET = "keyboard_preset"
         const val KEY_SOFT_KEYBOARD = "soft_keyboard"
@@ -164,6 +165,10 @@ class SettingsManager(private val context: Context) {
     var extendedKeyboard: Boolean
         get() = sharedPreferences.getBoolean(KEY_USE_EXTENDED_KEYBOARD, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_USE_EXTENDED_KEYBOARD, value).apply()
+    var cursorHaptics: Boolean
+        get() = sharedPreferences.getBoolean(KEY_CURSOR_HAPTICS, true)
+        set(value) = sharedPreferences.edit().putBoolean(KEY_CURSOR_HAPTICS, value).apply()
+
     var magnifier: Boolean
         get() = sharedPreferences.getBoolean(KEY_MAGNIFIER, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_MAGNIFIER, value).apply()

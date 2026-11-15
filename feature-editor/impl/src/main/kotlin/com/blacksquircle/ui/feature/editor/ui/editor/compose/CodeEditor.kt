@@ -104,6 +104,7 @@ internal fun CodeEditor(
             editor.setShowInvisibleChars(settings.showInvisibleChars)
             editor.getComponent<Magnifier>().isEnabled = settings.magnifier
             editor.highlightColor = settings.highlightColor
+            editor.cursorHaptics = settings.cursorHaptics
 
             val editorLanguage = editor.createFromRegistry(
                 language = language,

@@ -17,8 +17,11 @@
 package com.blacksquircle.ui.feature.editor.ui.editor.view
 
 import android.content.Context
+import android.os.Build
 import android.util.AttributeSet
+import android.view.HapticFeedbackConstants
 import com.blacksquircle.ui.feature.editor.R
+import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.EditorRenderer
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
@@ -76,7 +79,22 @@ internal class CodeEditor @JvmOverloads constructor(
             setAdapter(SquircleCompletion.Adapter())
         }
         replaceComponent(EditorTextActionWindow::class.java, FloatingTextActions(this))
+
+        /** Light tick each time the cursor or selection moves while a handle is dragged */
+        subscribeAlways(SelectionChangeEvent::class.java) {
+            if (cursorHaptics && (eventHandler.hasAnyHeldHandle() || eventHandler.isDragSelecting)) {
+                val feedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    HapticFeedbackConstants.TEXT_HANDLE_MOVE
+                } else {
+                    HapticFeedbackConstants.CLOCK_TICK
+                }
+                performHapticFeedback(feedback)
+            }
+        }
     }
+
+    /** Vibrate as the cursor moves while dragging */
+    var cursorHaptics: Boolean = true
 
     /** Current line highlight color; 0 means use the theme's color */
     var highlightColor: Int = 0

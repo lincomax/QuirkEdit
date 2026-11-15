@@ -1574,6 +1574,7 @@ internal class EditorViewModel @Inject constructor(
         extendedKeyboard = settingsManager.extendedKeyboard,
         miniToolbar = settingsManager.miniToolbar,
         magnifier = settingsManager.magnifier,
+        cursorHaptics = settingsManager.cursorHaptics,
         highlightColor = settingsManager.highlightColor,
         keyboardPreset = settingsManager.keyboardPreset.toMutableList().distinct(),
         softKeyboard = settingsManager.softKeyboard,

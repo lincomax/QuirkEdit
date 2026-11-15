@@ -71,6 +71,8 @@
     <string name="settings_highlight_color_default" translatable="false">Theme default</string>
     <string name="settings_highlight_color_reset" translatable="false">Default</string>
     <string name="settings_magnifier_title" translatable="false">Magnifier</string>
+    <string name="settings_cursor_haptics_title" translatable="false">Haptic feedback</string>
+    <string name="settings_cursor_haptics_subtitle" translatable="false">Vibrate lightly as the cursor or selection moves while dragging</string>
     <string name="settings_magnifier_subtitle" translatable="false">Show a magnifier while dragging the cursor or selection handles</string>
     <string name="settings_highlight_delimiters_title">Highlight Matching Delimiters</string>
     <string name="settings_highlight_delimiters_subtitle">Highlight the opening or closing delimiter when you set the caret at its pair</string>

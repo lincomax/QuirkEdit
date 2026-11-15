@@ -89,6 +89,7 @@ internal fun EditorHeaderScreen(
         onResetKeyboardClicked = viewModel::onResetKeyboardClicked,
         onSoftKeyboardChanged = viewModel::onSoftKeyboardChanged,
         onMagnifierChanged = viewModel::onMagnifierChanged,
+        onCursorHapticsChanged = viewModel::onCursorHapticsChanged,
         onHighlightColorChanged = viewModel::onHighlightColorChanged,
     )
 
@@ -124,6 +125,7 @@ private fun EditorHeaderScreen(
     onResetKeyboardClicked: () -> Unit = {},
     onSoftKeyboardChanged: (Boolean) -> Unit = {},
     onMagnifierChanged: (Boolean) -> Unit = {},
+    onCursorHapticsChanged: (Boolean) -> Unit = {},
     onHighlightColorChanged: (Int) -> Unit = {},
 ) {
     var showColorPicker by remember { mutableStateOf(false) }
@@ -228,6 +230,12 @@ private fun EditorHeaderScreen(
                 subtitle = stringResource(R.string.settings_magnifier_subtitle),
                 checked = viewState.magnifier,
                 onCheckedChange = onMagnifierChanged,
+            )
+            SwitchPreference(
+                title = stringResource(R.string.settings_cursor_haptics_title),
+                subtitle = stringResource(R.string.settings_cursor_haptics_subtitle),
+                checked = viewState.cursorHaptics,
+                onCheckedChange = onCursorHapticsChanged,
             )
             SwitchPreference(
                 title = stringResource(R.string.settings_highlight_delimiters_title),

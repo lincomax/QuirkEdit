@@ -1,0 +1,124 @@
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java b/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java
+index e9602e9..7dcf1fd 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java
+@@ -310,15 +310,9 @@ public final class EditorTouchEventHandler implements GestureDetector.OnGestureL
+         // A handle is already held
+         var pos = getHandleDescriptorByType(selHandleType).position;
+ 
+-        var height = pos.height();
+-        int x, y;
+-        if (editor.isStickyTextSelection()) {
+-            x = Math.min((int) e.getX(), (int) pos.right);
+-            y = (int) (pos.top - height / 2);
+-        } else {
+-            x = (int) e.getX();
+-            y = (int) (e.getY() - height / 2 - editor.getRowHeight());
+-        }
++        // Follow the finger sideways; stay centred on the line the handle is on
++        int x = (int) e.getX();
++        int y = (int) (pos.top - editor.getRowHeight() / 2f);
+         magnifier.show(x, y);
+     }
+ 
+@@ -358,8 +352,11 @@ public final class EditorTouchEventHandler implements GestureDetector.OnGestureL
+                 return;
+             }
+         }
++        // Follow the finger sideways; stay centred on the line under the finger
++        int rowHeight = editor.getRowHeight();
++        int row = (int) ((e.getY() + editor.getOffsetY()) / rowHeight);
+         int x = (int) e.getX();
+-        int y = (int) (e.getY() - editor.getRowHeight());
++        int y = row * rowHeight + rowHeight / 2 - editor.getOffsetY();
+         magnifier.show(x, y);
+     }
+ 
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/widget/component/Magnifier.java b/editor/src/main/java/io/github/rosemoe/sora/widget/component/Magnifier.java
+index a0110be..91ec11f 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/widget/component/Magnifier.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/widget/component/Magnifier.java
+@@ -73,6 +73,9 @@ public class Magnifier implements EditorBuiltinComponent {
+     private boolean enabled = true;
+     private boolean withinEditorForcibly = false;
+     private View parentView;
++    /** Android's own text magnifier (Android 10+): same look and motion as other apps */
++    private android.widget.Magnifier platformMagnifier;
++    private boolean platformShowing;
+ 
+     /**
+      * Scale factor for regions
+@@ -211,9 +214,19 @@ public class Magnifier implements EditorBuiltinComponent {
+             }
+             return;
+         }
+-        popup.setWidth(Math.min(view.getWidth() * 3 / 5, (int) view.getDpUnit()) * 250);
+         this.x = x;
+         this.y = y;
++        if (usePlatformMagnifier()) {
++            // x, y: centre of the text being magnified. The magnifier sits just above that line.
++            var magnifier = getPlatformMagnifier();
++            float rowHeight = view.getRowHeight();
++            float sourceX = Math.max(0, Math.min(x, view.getWidth()));
++            float magnifierY = y - rowHeight / 2f - magnifier.getHeight() / 2f;
++            magnifier.show(sourceX, y, sourceX, magnifierY);
++            platformShowing = true;
++            return;
++        }
++        popup.setWidth(Math.min(view.getWidth() * 3 / 5, (int) view.getDpUnit()) * 250);
+         int[] pos = new int[2];
+         view.getLocationInWindow(pos);
+         var left = Math.max(pos[0] + x - popup.getWidth() / 2, 0);
+@@ -235,13 +248,40 @@ public class Magnifier implements EditorBuiltinComponent {
+      * Whether the magnifier is showing
+      */
+     public boolean isShowing() {
+-        return popup.isShowing();
++        return platformShowing || popup.isShowing();
++    }
++
++    private boolean usePlatformMagnifier() {
++        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && !withinEditorForcibly;
++    }
++
++    private android.widget.Magnifier getPlatformMagnifier() {
++        if (platformMagnifier == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
++            float dp = view.getDpUnit();
++            int width = Math.round(100 * dp);
++            int height = Math.round(48 * dp);
++            platformMagnifier = new android.widget.Magnifier.Builder(view)
++                    .setSize(width, height)
++                    .setCornerRadius(height / 2f)
++                    .setInitialZoom(scaleFactor)
++                    .setElevation(4 * dp)
++                    .setClippingEnabled(true)
++                    .build();
++        }
++        return platformMagnifier;
+     }
+ 
+     /**
+      * Hide the magnifier
+      */
+     public void dismiss() {
++        if (platformMagnifier != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
++            platformMagnifier.dismiss();
++        }
++        platformShowing = false;
++        // Forget the last position so the next show isn't skipped
++        x = -100000;
++        y = -100000;
+         popup.dismiss();
+     }
+ 
+@@ -258,6 +298,10 @@ public class Magnifier implements EditorBuiltinComponent {
+         if (!isShowing()) {
+             return;
+         }
++        if (platformShowing && platformMagnifier != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
++            platformMagnifier.update();
++            return;
++        }
+         if (!withinEditorForcibly && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isPixelCopyApplicable()) {
+             updateDisplayOreo((Activity) view.getContext());
+         } else {

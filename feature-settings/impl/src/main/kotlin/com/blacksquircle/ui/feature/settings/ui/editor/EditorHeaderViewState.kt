@@ -37,5 +37,6 @@ internal data class EditorHeaderViewState(
     val keyboardPreset: String,
     val softKeyboard: Boolean,
     val magnifier: Boolean = true,
+    val cursorHaptics: Boolean = true,
     val highlightColor: Int = 0,
 ) : ViewState

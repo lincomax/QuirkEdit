@@ -157,6 +157,13 @@ internal class EditorHeaderViewModel @Inject constructor(
         }
     }
 
+    fun onCursorHapticsChanged(cursorHaptics: Boolean) {
+        viewModelScope.launch {
+            settingsManager.cursorHaptics = cursorHaptics
+            _viewState.value = updateViewState()
+        }
+    }
+
     fun onMagnifierChanged(magnifier: Boolean) {
         viewModelScope.launch {
             settingsManager.magnifier = magnifier
@@ -196,6 +203,7 @@ internal class EditorHeaderViewModel @Inject constructor(
             keyboardPreset = settingsManager.keyboardPreset,
             softKeyboard = settingsManager.softKeyboard,
             magnifier = settingsManager.magnifier,
+            cursorHaptics = settingsManager.cursorHaptics,
             highlightColor = settingsManager.highlightColor,
         )
     }
