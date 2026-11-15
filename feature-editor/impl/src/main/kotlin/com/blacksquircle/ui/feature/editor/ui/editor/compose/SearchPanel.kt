@@ -158,16 +158,6 @@ internal fun SearchPanel(
                 .fillMaxWidth()
         ) {
             TextButton(
-                text = stringResource(R.string.editor_menu_find_prev),
-                onClick = onPreviousMatchClicked,
-                debounce = false,
-            )
-            TextButton(
-                text = stringResource(R.string.editor_menu_find_next),
-                onClick = onNextMatchClicked,
-                debounce = false,
-            )
-            TextButton(
                 text = stringResource(R.string.editor_menu_find_replace),
                 onClick = onReplaceMatchClicked,
                 enabled = searchState.replaceShown,
@@ -178,6 +168,16 @@ internal fun SearchPanel(
                 onClick = onReplaceAllClicked,
                 enabled = searchState.replaceShown,
                 debounce = true,
+            )
+            TextButton(
+                text = stringResource(R.string.editor_menu_find_prev),
+                onClick = onPreviousMatchClicked,
+                debounce = false,
+            )
+            TextButton(
+                text = stringResource(R.string.editor_menu_find_next),
+                onClick = onNextMatchClicked,
+                debounce = false,
             )
         }
     }

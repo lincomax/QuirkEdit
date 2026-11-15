@@ -16,10 +16,12 @@
 
 package com.blacksquircle.ui.feature.editor.ui.editor.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
 import android.view.HapticFeedbackConstants
+import android.view.MotionEvent
 import com.blacksquircle.ui.feature.editor.R
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.Content
@@ -80,17 +82,67 @@ internal class CodeEditor @JvmOverloads constructor(
         }
         replaceComponent(EditorTextActionWindow::class.java, FloatingTextActions(this))
 
-        /** Light tick each time the cursor or selection moves while a handle is dragged */
-        subscribeAlways(SelectionChangeEvent::class.java) {
-            if (cursorHaptics && (eventHandler.hasAnyHeldHandle() || eventHandler.isDragSelecting)) {
-                val feedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                    HapticFeedbackConstants.TEXT_HANDLE_MOVE
-                } else {
-                    HapticFeedbackConstants.CLOCK_TICK
-                }
-                performHapticFeedback(feedback)
+        /**
+         * Haptics like Android's text fields: one light tick when a dragged handle
+         * actually lands on a new position, at most one per touch movement
+         */
+        subscribeAlways(SelectionChangeEvent::class.java) { event ->
+            if (event.cause != SelectionChangeEvent.CAUSE_SELECTION_HANDLE) {
+                rememberHapticPosition()
+                return@subscribeAlways
+            }
+            if (cursor.left == hapticLeft && cursor.right == hapticRight) {
+                return@subscribeAlways
+            }
+            rememberHapticPosition()
+            if (dispatchingTouch) {
+                hapticPending = true
+            } else {
+                /** Moved by edge auto-scroll, outside of a touch event */
+                performHandleHaptic()
             }
         }
+    }
+
+    private var hapticLeft = -1
+    private var hapticRight = -1
+    private var hapticPending = false
+    private var dispatchingTouch = false
+
+    private fun rememberHapticPosition() {
+        hapticLeft = cursor.left
+        hapticRight = cursor.right
+    }
+
+    private fun performHandleHaptic() {
+        if (!cursorHaptics) {
+            return
+        }
+        val feedback = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            HapticFeedbackConstants.TEXT_HANDLE_MOVE
+        } else {
+            HapticFeedbackConstants.CLOCK_TICK
+        }
+        performHapticFeedback(feedback)
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+            hapticPending = false
+            rememberHapticPosition()
+        }
+        dispatchingTouch = true
+        val handled = try {
+            super.onTouchEvent(event)
+        } finally {
+            dispatchingTouch = false
+        }
+        if (hapticPending) {
+            hapticPending = false
+            performHandleHaptic()
+        }
+        return handled
     }
 
     /** Vibrate as the cursor moves while dragging */
