@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import com.blacksquircle.ui.ds.SquircleTheme
 import com.blacksquircle.ui.ds.toolbar.ToolbarSize
 
