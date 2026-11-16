@@ -30,7 +30,7 @@ internal object ThemeMapper {
         return ThemeModel(
             uuid = assetsTheme.themeId,
             name = assetsTheme.themeName,
-            author = if (assetsTheme.themeId.startsWith("squick_")) "SquickEdit" else "Squircle CE",
+            author = if (assetsTheme.themeId.startsWith("squick_")) "QuirkEdit" else "Squircle CE",
             colors = when (assetsTheme) {
                 AssetsTheme.THEME_SQUICK_LIGHT -> EditorTheme.SQUICK_LIGHT
                 AssetsTheme.THEME_SQUICK_DARK -> EditorTheme.SQUICK_DARK

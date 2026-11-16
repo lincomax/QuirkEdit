@@ -34,11 +34,10 @@ android {
     namespace = "com.blacksquircle.ui"
 
     defaultConfig {
-        applicationId = "com.blacksquircle.ui"
-        // Installs alongside the official Squircle CE
-        applicationIdSuffix = ".squickedit"
-        versionCode = 10028
-        versionName = "2025.1.3-squickedit"
+        applicationId = "com.quirk.edit"
+        // Set by the build workflow: YEAR.MONTH.N, where N counts every release and never resets
+        versionCode = 24
+        versionName = "2026.11.24"
     }
     compileOptions {
         isCoreLibraryDesugaringEnabled = true

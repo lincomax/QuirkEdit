@@ -1,6 +1,6 @@
-# SquickEdit
+# QuirkEdit
 
-<img src=".github/images/svg/ic_launcher_round_api_24.svg" alt="SquickEdit" width="120" align="left">
+<img src=".github/images/svg/ic_launcher_round_api_24.svg" alt="QuirkEdit" width="120" align="left">
 
 A text and code editor for Android, based on [Squircle CE](https://github.com/massivemadness/Squircle-CE).
 

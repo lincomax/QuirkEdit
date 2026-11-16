@@ -72,13 +72,16 @@ jobs:
             echo "KEY_PASSWORD=$SIGNING_PASSWORD"
           } > local.properties
 
-      - name: Set version from build number
+      - name: Set version
         run: |
-          # Every build gets a higher version, so ObtainX sees it as an update
-          BASE=$(grep -oP 'versionName = "\K[0-9.]+' app/build.gradle.kts | sed 's/\.$//')
-          VERSION="$BASE.${{ github.run_number }}"
-          CODE=$((20000 + ${{ github.run_number }}))
-          sed -i -E "s/versionCode = [0-9]+/versionCode = $CODE/" app/build.gradle.kts
+          # YEAR.MONTH.N - N counts every release and never resets (first release: 24)
+          LAST=$(git ls-remote --tags origin 'refs/tags/v*' \
+            | sed -E 's#.*refs/tags/##; s/\^\{\}$//' \
+            | grep -E '^v[0-9]{4}\.[0-9]{1,2}\.[0-9]+$' \
+            | sed -E 's/.*\.//' | sort -n | tail -1)
+          N=$(( ${LAST:-23} + 1 ))
+          VERSION="$(TZ=America/Chicago date +%Y.%-m).$N"
+          sed -i -E "s/versionCode = [0-9]+/versionCode = $N/" app/build.gradle.kts
           sed -i -E "s/versionName = \"[^\"]*\"/versionName = \"$VERSION\"/" app/build.gradle.kts
           grep -E "versionCode|versionName" app/build.gradle.kts
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
@@ -91,7 +94,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v7
         with:
-          name: SquickEdit
+          name: QuirkEdit
           path: app/build/outputs/apk/foss/release/*.apk
 
       - name: Publish release
@@ -99,10 +102,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           APK=$(ls app/build/outputs/apk/foss/release/*.apk | head -1)
-          cp "$APK" "SquickEdit-v$VERSION.apk"
+          cp "$APK" "QuirkEdit-v$VERSION.apk"
           git log -1 --format=%B > release-notes.txt
-          gh release create "v$VERSION" "SquickEdit-v$VERSION.apk" \
-            --title "SquickEdit v$VERSION" \
+          gh release create "v$VERSION" "QuirkEdit-v$VERSION.apk" \
+            --title "QuirkEdit v$VERSION" \
             --notes-file release-notes.txt \
             --target "$GITHUB_SHA"
 
