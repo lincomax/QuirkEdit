@@ -40,4 +40,18 @@
     <string name="common_access_denied_dialog_title">Access Denied</string>
     <string name="common_access_denied_dialog_message">Application requires storage access to work with files</string>
 
+    <string name="mini_toolbar_open">Open</string>
+    <string name="mini_toolbar_new">New</string>
+    <string name="mini_toolbar_paste">Paste</string>
+    <string name="mini_toolbar_copy">Copy</string>
+    <string name="mini_toolbar_cut">Cut</string>
+    <string name="mini_toolbar_select_all">Select All</string>
+    <string name="mini_toolbar_undo">Undo</string>
+    <string name="mini_toolbar_redo">Redo</string>
+    <string name="mini_toolbar_search">Search</string>
+    <string name="mini_toolbar_goto_line">Go to Line</string>
+    <string name="mini_toolbar_save">Save</string>
+    <string name="mini_toolbar_save_as">Save As</string>
+    <string name="mini_toolbar_close">Close</string>
+
 </resources>

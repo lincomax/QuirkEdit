@@ -170,7 +170,7 @@
     <string name="settings_recursive_submodules_subtitle">Fetch submodules and their dependencies recursively</string>
 
     <string name="settings_category_about">About</string>
-    <string name="settings_about_subtitle">QuirkEdit is an open source project published under the Apache 2.0 license\n\nVersion: %1$s (%2$d)</string>
+    <string name="settings_about_subtitle">QuirkEdit is an open source project published under the Apache 2.0 license\n\nVersion: %1$s</string>
     <string name="settings_about_version_debug" translatable="false">-debug</string>
     <string name="settings_privacy_policy_title">Privacy Policy</string>
 
@@ -180,4 +180,16 @@
     <string name="settings_contribute_title">Contribute to development</string>
     <string name="settings_contribute_subtitle">You can create an issue on GitHub or translate this app to your native language.\n\nThank you!</string>
 
+    <string name="settings_mini_toolbar_title">Mini Toolbar</string>
+    <string name="settings_mini_toolbar_subtitle">Choose or reorder bottom toolbar items</string>
+    <string name="settings_mini_toolbar_reset">Reset</string>
+    <string name="settings_category_backup">Backup</string>
+    <string name="settings_export_title">Export settings</string>
+    <string name="settings_export_subtitle">Save all settings to a file</string>
+    <string name="settings_import_title">Import settings</string>
+    <string name="settings_import_subtitle">Load settings from an exported file</string>
+    <string name="settings_export_done">Settings exported</string>
+    <string name="settings_export_failed">Couldn\'t export settings</string>
+    <string name="settings_import_done">%1$d settings imported</string>
+    <string name="settings_import_failed">Not a valid settings file</string>
 </resources>

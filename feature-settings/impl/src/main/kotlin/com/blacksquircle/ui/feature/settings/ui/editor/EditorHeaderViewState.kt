@@ -18,6 +18,8 @@ package com.blacksquircle.ui.feature.settings.ui.editor
 
 import androidx.compose.runtime.Immutable
 import com.blacksquircle.ui.core.mvi.ViewState
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItem
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItems
 
 @Immutable
 internal data class EditorHeaderViewState(
@@ -39,4 +41,5 @@ internal data class EditorHeaderViewState(
     val magnifier: Boolean = true,
     val cursorHaptics: Boolean = true,
     val highlightColor: Int = 0,
+    val miniToolbarItems: List<MiniToolbarItem> = MiniToolbarItems.DEFAULT,
 ) : ViewState

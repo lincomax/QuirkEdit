@@ -16,13 +16,19 @@
 
 package com.blacksquircle.ui.feature.settings.ui.application
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.blacksquircle.ui.core.mvi.ViewEvent
+import com.blacksquircle.ui.core.provider.resources.StringProvider
 import com.blacksquircle.ui.core.settings.SettingsManager
+import com.blacksquircle.ui.feature.settings.R
 import com.blacksquircle.ui.feature.themes.api.navigation.ThemesRoute
 import com.blacksquircle.ui.navigation.api.Navigator
+import javax.inject.Inject
+import javax.inject.Provider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,11 +36,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 internal class AppHeaderViewModel @Inject constructor(
     private val settingsManager: SettingsManager,
+    private val stringProvider: StringProvider,
     private val navigator: Navigator,
 ) : ViewModel() {
 
@@ -63,6 +70,33 @@ internal class AppHeaderViewModel @Inject constructor(
         viewModelScope.launch {
             settingsManager.confirmExit = value
             _viewState.value = updateViewState()
+        }
+    }
+
+    fun onExportSettings(uri: Uri) {
+        viewModelScope.launch {
+            val message = try {
+                withContext(Dispatchers.IO) { settingsManager.exportSettings(uri) }
+                stringProvider.getString(R.string.settings_export_done)
+            } catch (e: Exception) {
+                Timber.e(e)
+                stringProvider.getString(R.string.settings_export_failed)
+            }
+            _viewEvent.send(ViewEvent.Toast(message))
+        }
+    }
+
+    fun onImportSettings(uri: Uri) {
+        viewModelScope.launch {
+            val message = try {
+                val count = withContext(Dispatchers.IO) { settingsManager.importSettings(uri) }
+                _viewState.value = updateViewState()
+                stringProvider.getString(R.string.settings_import_done, count)
+            } catch (e: Exception) {
+                Timber.e(e)
+                stringProvider.getString(R.string.settings_import_failed)
+            }
+            _viewEvent.send(ViewEvent.Toast(message))
         }
     }
 

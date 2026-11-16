@@ -55,9 +55,11 @@ import com.blacksquircle.ui.ds.preference.SliderPreference
 import com.blacksquircle.ui.ds.preference.SwitchPreference
 import com.blacksquircle.ui.ds.preference.TextFieldPreference
 import com.blacksquircle.ui.ds.scaffold.ScaffoldSuite
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItem
 import com.blacksquircle.ui.ds.toolbar.Toolbar
 import com.blacksquircle.ui.feature.settings.R
 import com.blacksquircle.ui.feature.settings.internal.SettingsComponent
+import com.blacksquircle.ui.feature.settings.ui.editor.compose.MiniToolbarDialog
 import com.blacksquircle.ui.ds.R as UiR
 
 @Composable
@@ -89,6 +91,7 @@ internal fun EditorHeaderScreen(
         onResetKeyboardClicked = viewModel::onResetKeyboardClicked,
         onSoftKeyboardChanged = viewModel::onSoftKeyboardChanged,
         onMagnifierChanged = viewModel::onMagnifierChanged,
+        onMiniToolbarItemsChanged = viewModel::onMiniToolbarItemsChanged,
         onCursorHapticsChanged = viewModel::onCursorHapticsChanged,
         onHighlightColorChanged = viewModel::onHighlightColorChanged,
     )
@@ -125,10 +128,12 @@ private fun EditorHeaderScreen(
     onResetKeyboardClicked: () -> Unit = {},
     onSoftKeyboardChanged: (Boolean) -> Unit = {},
     onMagnifierChanged: (Boolean) -> Unit = {},
+    onMiniToolbarItemsChanged: (List<MiniToolbarItem>) -> Unit = {},
     onCursorHapticsChanged: (Boolean) -> Unit = {},
     onHighlightColorChanged: (Int) -> Unit = {},
 ) {
     var showColorPicker by remember { mutableStateOf(false) }
+    var showMiniToolbarDialog by remember { mutableStateOf(false) }
 
     ScaffoldSuite(
         topBar = {
@@ -275,6 +280,11 @@ private fun EditorHeaderScreen(
             PreferenceGroup(
                 title = stringResource(R.string.settings_category_keyboard)
             )
+            Preference(
+                title = stringResource(R.string.settings_mini_toolbar_title),
+                subtitle = stringResource(R.string.settings_mini_toolbar_subtitle),
+                onClick = { showMiniToolbarDialog = true },
+            )
             SwitchPreference(
                 title = stringResource(R.string.settings_extended_keyboard_title),
                 subtitle = stringResource(R.string.settings_extended_keyboard_subtitle),
@@ -300,6 +310,17 @@ private fun EditorHeaderScreen(
                 onCheckedChange = onSoftKeyboardChanged,
             )
         }
+    }
+
+    if (showMiniToolbarDialog) {
+        MiniToolbarDialog(
+            items = viewState.miniToolbarItems,
+            onConfirm = { items ->
+                showMiniToolbarDialog = false
+                onMiniToolbarItemsChanged(items)
+            },
+            onDismiss = { showMiniToolbarDialog = false },
+        )
     }
 
     if (showColorPicker) {

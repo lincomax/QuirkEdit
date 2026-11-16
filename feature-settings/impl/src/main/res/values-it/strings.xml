@@ -139,7 +139,7 @@
     <string name="settings_recursive_submodules_title">Sottomoduli ricorrenti</string>
     <string name="settings_recursive_submodules_subtitle">Preleva i sottomoduli con le loro dipendenze ricorrenti</string>
     <string name="settings_category_about">Informazioni</string>
-    <string name="settings_about_subtitle">QuirkEdit è un progetto open source pubblicato sotto la licenza Apache 2.0\n\nVersione: %1$s (%2$d)</string>
+    <string name="settings_about_subtitle">QuirkEdit è un progetto open source pubblicato sotto la licenza Apache 2.0\n\nVersione: %1$s</string>
     <string name="settings_privacy_policy_title">Policy Privacy</string>
     <string name="settings_category_contribute">Contribuisci</string>
     <string name="settings_translation_title">Piattaforma di Traduzione</string>

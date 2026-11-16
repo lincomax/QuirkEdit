@@ -21,8 +21,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.blacksquircle.ui.core.mvi.ViewEvent
 import com.blacksquircle.ui.core.settings.SettingsManager
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItem
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItems
 import com.blacksquircle.ui.feature.fonts.api.navigation.FontsRoute
 import com.blacksquircle.ui.navigation.api.Navigator
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,8 +34,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Provider
 
 internal class EditorHeaderViewModel @Inject constructor(
     private val settingsManager: SettingsManager,
@@ -164,6 +166,13 @@ internal class EditorHeaderViewModel @Inject constructor(
         }
     }
 
+    fun onMiniToolbarItemsChanged(items: List<MiniToolbarItem>) {
+        viewModelScope.launch {
+            settingsManager.miniToolbarItems = MiniToolbarItems.serialize(items)
+            _viewState.value = updateViewState()
+        }
+    }
+
     fun onMagnifierChanged(magnifier: Boolean) {
         viewModelScope.launch {
             settingsManager.magnifier = magnifier
@@ -203,6 +212,7 @@ internal class EditorHeaderViewModel @Inject constructor(
             keyboardPreset = settingsManager.keyboardPreset,
             softKeyboard = settingsManager.softKeyboard,
             magnifier = settingsManager.magnifier,
+            miniToolbarItems = MiniToolbarItems.parse(settingsManager.miniToolbarItems),
             cursorHaptics = settingsManager.cursorHaptics,
             highlightColor = settingsManager.highlightColor,
         )

@@ -33,6 +33,7 @@ internal data class ExplorerViewState(
     val searchQuery: String = "",
     val showHidden: Boolean = true,
     val compactPackages: Boolean = true,
+    val searchAllStorage: Boolean = true,
     val sortMode: SortMode = SortMode.SORT_BY_NAME,
     val taskType: TaskType = TaskType.CREATE,
 ) : ViewState {

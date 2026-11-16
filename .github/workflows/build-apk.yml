@@ -5,7 +5,12 @@ on:
   push:
     branches: [ master ]
     paths-ignore:
-      - 'README.md'
+      - '**.md'
+      - '.github/images/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - 'LICENSE'
+      - '.gitignore'
+      - '.gitattributes'
 
 permissions:
   contents: write

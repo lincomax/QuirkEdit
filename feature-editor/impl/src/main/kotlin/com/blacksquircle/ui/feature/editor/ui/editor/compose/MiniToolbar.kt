@@ -32,24 +32,31 @@ import com.blacksquircle.ui.ds.SquircleTheme
 import com.blacksquircle.ui.ds.button.IconButton
 import com.blacksquircle.ui.ds.button.IconButtonSizeDefaults
 import com.blacksquircle.ui.ds.button.IconButtonStyleDefaults
-import com.blacksquircle.ui.feature.editor.R
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarAction
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItems
 import com.blacksquircle.ui.feature.editor.ui.editor.model.DocumentState
-import com.blacksquircle.ui.ds.R as UiR
 
 /**
- * Mini toolbar: a flat row of evenly spaced
- * quick actions pinned to the bottom of the editor.
+ * Mini toolbar: a flat row of evenly spaced quick actions
+ * pinned to the bottom of the editor, chosen and ordered in settings.
  */
 @Composable
 internal fun MiniToolbar(
     currentDocument: DocumentState?,
     modifier: Modifier = Modifier,
+    items: List<MiniToolbarAction> = MiniToolbarItems.DEFAULT.filter { it.enabled }.map { it.action },
     onOpenFileClicked: () -> Unit = {},
+    onNewFileClicked: () -> Unit = {},
     onPasteClicked: () -> Unit = {},
+    onCopyClicked: () -> Unit = {},
+    onCutClicked: () -> Unit = {},
+    onSelectAllClicked: () -> Unit = {},
     onUndoClicked: () -> Unit = {},
     onRedoClicked: () -> Unit = {},
     onFindClicked: () -> Unit = {},
+    onGoToLineClicked: () -> Unit = {},
     onSaveFileClicked: () -> Unit = {},
+    onSaveFileAsClicked: () -> Unit = {},
     onCloseFileClicked: () -> Unit = {},
 ) {
     val hasDocument = currentDocument != null
@@ -58,48 +65,36 @@ internal fun MiniToolbar(
         horizontalArrangement = Arrangement.SpaceEvenly,
         modifier = modifier
             .fillMaxWidth()
-            .height(48.dp)
+            .height(40.dp)
             .background(SquircleTheme.colors.colorBackgroundSecondary)
     ) {
-        MiniAction(UiR.drawable.ic_folder_open, stringResource(R.string.editor_menu_file_open), onOpenFileClicked)
-        MiniAction(UiR.drawable.ic_paste, stringResource(android.R.string.paste), onPasteClicked, enabled = hasDocument)
-        MiniAction(
-            iconResId = UiR.drawable.ic_undo,
-            description = stringResource(R.string.editor_menu_edit_undo),
-            onClick = onUndoClicked,
-            enabled = currentDocument?.canUndo ?: false,
-            debounce = false,
-        )
-        MiniAction(
-            iconResId = UiR.drawable.ic_redo,
-            description = stringResource(R.string.editor_menu_edit_redo),
-            onClick = onRedoClicked,
-            enabled = currentDocument?.canRedo ?: false,
-            debounce = false,
-        )
-        MiniAction(UiR.drawable.ic_search, stringResource(R.string.editor_menu_search), onFindClicked, enabled = hasDocument)
-        MiniAction(UiR.drawable.ic_save, stringResource(R.string.editor_menu_file_save), onSaveFileClicked, enabled = hasDocument)
-        MiniAction(UiR.drawable.ic_close, stringResource(R.string.editor_menu_file_close), onCloseFileClicked, enabled = hasDocument)
+        items.forEach { action ->
+            val (onClick, enabled) = when (action) {
+                MiniToolbarAction.OPEN -> onOpenFileClicked to true
+                MiniToolbarAction.NEW -> onNewFileClicked to true
+                MiniToolbarAction.PASTE -> onPasteClicked to hasDocument
+                MiniToolbarAction.COPY -> onCopyClicked to hasDocument
+                MiniToolbarAction.CUT -> onCutClicked to hasDocument
+                MiniToolbarAction.SELECT_ALL -> onSelectAllClicked to hasDocument
+                MiniToolbarAction.UNDO -> onUndoClicked to (currentDocument?.canUndo ?: false)
+                MiniToolbarAction.REDO -> onRedoClicked to (currentDocument?.canRedo ?: false)
+                MiniToolbarAction.SEARCH -> onFindClicked to hasDocument
+                MiniToolbarAction.GO_TO_LINE -> onGoToLineClicked to hasDocument
+                MiniToolbarAction.SAVE -> onSaveFileClicked to hasDocument
+                MiniToolbarAction.SAVE_AS -> onSaveFileAsClicked to hasDocument
+                MiniToolbarAction.CLOSE -> onCloseFileClicked to hasDocument
+            }
+            IconButton(
+                iconResId = action.iconRes,
+                onClick = onClick,
+                contentDescription = stringResource(action.titleRes),
+                enabled = enabled,
+                debounce = action != MiniToolbarAction.UNDO && action != MiniToolbarAction.REDO,
+                iconButtonStyle = IconButtonStyleDefaults.Accessory,
+                iconButtonSize = IconButtonSizeDefaults.S,
+            )
+        }
     }
-}
-
-@Composable
-private fun MiniAction(
-    iconResId: Int,
-    description: String,
-    onClick: () -> Unit,
-    enabled: Boolean = true,
-    debounce: Boolean = true,
-) {
-    IconButton(
-        iconResId = iconResId,
-        onClick = onClick,
-        contentDescription = description,
-        enabled = enabled,
-        debounce = debounce,
-        iconButtonStyle = IconButtonStyleDefaults.Secondary,
-        iconButtonSize = IconButtonSizeDefaults.S,
-    )
 }
 
 @PreviewLightDark

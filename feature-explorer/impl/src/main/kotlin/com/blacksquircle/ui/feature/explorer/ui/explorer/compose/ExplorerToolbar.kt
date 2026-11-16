@@ -57,12 +57,14 @@ internal fun ExplorerToolbar(
     selection: List<FileNode>,
     showHidden: Boolean,
     compactPackages: Boolean,
+    searchAllStorage: Boolean = true,
     sortMode: SortMode,
     modifier: Modifier = Modifier,
     onQueryChanged: (String) -> Unit = {},
     onClearQueryClicked: () -> Unit = {},
     onShowHiddenClicked: () -> Unit = {},
     onCompactPackagesClicked: () -> Unit = {},
+    onSearchAllStorageClicked: () -> Unit = {},
     onSortModeSelected: (SortMode) -> Unit = {},
     onCopyClicked: () -> Unit = {},
     onDeleteClicked: () -> Unit = {},
@@ -184,6 +186,7 @@ internal fun ExplorerToolbar(
                             onDismiss = { expanded = false },
                             showHidden = showHidden,
                             compactPackages = compactPackages,
+                            searchAllStorage = searchAllStorage,
                             sortMode = sortMode,
                             onShowHiddenClicked = {
                                 expanded = false
@@ -192,6 +195,10 @@ internal fun ExplorerToolbar(
                             onCompactPackagesClicked = {
                                 expanded = false
                                 onCompactPackagesClicked()
+                            },
+                            onSearchAllStorageClicked = {
+                                expanded = false
+                                onSearchAllStorageClicked()
                             },
                             onSortModeSelected = {
                                 expanded = false

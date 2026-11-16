@@ -34,9 +34,25 @@ object IconButtonStyleDefaults {
         @Composable
         @ReadOnlyComposable
         get() = IconButtonStyle(
-            iconColor = SquircleTheme.colors.colorTextAndIconPrimary,
+            iconColor = SquircleTheme.colors.colorTextAndIconSecondary,
             disabledIconColor = SquircleTheme.colors.colorTextAndIconDisabled,
         )
+
+    /** Bottom toolbar: translucent white on dark, translucent grey on light */
+    val Accessory: IconButtonStyle
+        @Composable
+        @ReadOnlyComposable
+        get() = if (SquircleTheme.colors.isDark) {
+            IconButtonStyle(
+                iconColor = Color.White.copy(alpha = 0.8f),
+                disabledIconColor = Color.White.copy(alpha = 0.3f),
+            )
+        } else {
+            IconButtonStyle(
+                iconColor = Color(0xFF333333).copy(alpha = 0.6f),
+                disabledIconColor = Color(0xFF333333).copy(alpha = 0.22f),
+            )
+        }
 
     val Secondary: IconButtonStyle
         @Composable

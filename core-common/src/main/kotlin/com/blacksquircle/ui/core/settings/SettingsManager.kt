@@ -18,12 +18,20 @@ package com.blacksquircle.ui.core.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.net.Uri
+import org.json.JSONArray
+import org.json.JSONObject
 
 typealias OnChangedListener = () -> Unit
 
 class SettingsManager(private val context: Context) {
 
     companion object {
+
+        private const val EXPORT_FORMAT = "quirkedit-settings"
+        private val NOT_EXPORTED by lazy {
+            setOf(KEY_SELECTED_DOCUMENT_ID, KEY_WORKSPACE, KEY_GIT_CREDENTIALS_PASSWORD)
+        }
 
         // Look And Feel
         const val KEY_EDITOR_THEME = "editor_theme_internal"
@@ -55,6 +63,7 @@ class SettingsManager(private val context: Context) {
         // Keyboard
         const val KEY_USE_EXTENDED_KEYBOARD = "use_extended_keyboard"
         const val KEY_MINI_TOOLBAR = "mini_toolbar"
+        const val KEY_MINI_TOOLBAR_ITEMS = "mini_toolbar_items"
         const val KEY_MAGNIFIER = "magnifier"
         const val KEY_CURSOR_HAPTICS = "cursor_haptics"
         const val KEY_HIGHLIGHT_COLOR = "highlight_color"
@@ -81,6 +90,7 @@ class SettingsManager(private val context: Context) {
         const val KEY_WORKSPACE = "workspace"
         const val KEY_SHOW_HIDDEN_FILES = "show_hidden_files"
         const val KEY_COMPACT_PACKAGES = "compact_packages"
+        const val KEY_SEARCH_ALL_STORAGE = "search_all_storage"
         const val KEY_FOLDERS_ON_TOP = "folders_on_top"
         const val KEY_SORT_MODE = "sort_mode"
 
@@ -105,6 +115,66 @@ class SettingsManager(private val context: Context) {
     private val sharedPreferences: SharedPreferences
         get() = _sharedPreferences ?: context.getSharedPreferences(fileName, Context.MODE_PRIVATE)
             .also { _sharedPreferences = it }
+
+    /** Writes every setting except session state and the git password as JSON */
+    fun exportSettings(uri: Uri) {
+        val values = JSONObject()
+        for ((key, value) in sharedPreferences.all) {
+            if (key in NOT_EXPORTED || value == null) continue
+            val entry = JSONObject()
+            when (value) {
+                is Boolean -> entry.put("type", "boolean").put("value", value)
+                is Int -> entry.put("type", "int").put("value", value)
+                is Long -> entry.put("type", "long").put("value", value)
+                is Float -> entry.put("type", "float").put("value", value.toDouble())
+                is String -> entry.put("type", "string").put("value", value)
+                is Set<*> -> entry.put("type", "set").put("value", JSONArray(value.map { it.toString() }))
+                else -> continue
+            }
+            values.put(key, entry)
+        }
+        val json = JSONObject()
+            .put("format", EXPORT_FORMAT)
+            .put("version", 1)
+            .put("settings", values)
+        context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter()?.use { writer ->
+            writer.write(json.toString(2))
+        } ?: throw IllegalStateException("Can't open $uri")
+    }
+
+    /** Applies settings from a file made by [exportSettings], returns how many were applied */
+    fun importSettings(uri: Uri): Int {
+        val text = context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+            ?: throw IllegalStateException("Can't open $uri")
+        val json = JSONObject(text)
+        require(json.optString("format") == EXPORT_FORMAT) { "Not a settings file" }
+        val values = json.getJSONObject("settings")
+        val editor = sharedPreferences.edit()
+        var count = 0
+        for (key in values.keys()) {
+            if (key in NOT_EXPORTED) continue
+            val entry = values.getJSONObject(key)
+            when (entry.getString("type")) {
+                "boolean" -> editor.putBoolean(key, entry.getBoolean("value"))
+                "int" -> editor.putInt(key, entry.getInt("value"))
+                "long" -> editor.putLong(key, entry.getLong("value"))
+                "float" -> editor.putFloat(key, entry.getDouble("value").toFloat())
+                "string" -> editor.putString(key, entry.getString("value"))
+                "set" -> {
+                    val array = entry.getJSONArray("value")
+                    editor.putStringSet(key, (0 until array.length()).map { array.getString(it) }.toSet())
+                }
+                else -> continue
+            }
+            count++
+        }
+        editor.commit()
+        return count
+    }
+
+    var searchAllStorage: Boolean
+        get() = sharedPreferences.getBoolean(KEY_SEARCH_ALL_STORAGE, true)
+        set(value) = sharedPreferences.edit().putBoolean(KEY_SEARCH_ALL_STORAGE, value).apply()
 
     var editorTheme: String
         get() = sharedPreferences.getString(KEY_EDITOR_THEME, "squick_dark") ?: "squick_dark"
@@ -180,6 +250,10 @@ class SettingsManager(private val context: Context) {
     var miniToolbar: Boolean
         get() = sharedPreferences.getBoolean(KEY_MINI_TOOLBAR, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_MINI_TOOLBAR, value).apply()
+    /** Bottom toolbar order and visibility, empty means default */
+    var miniToolbarItems: String
+        get() = sharedPreferences.getString(KEY_MINI_TOOLBAR_ITEMS, "") ?: ""
+        set(value) = sharedPreferences.edit().putString(KEY_MINI_TOOLBAR_ITEMS, value).apply()
     var keyboardPreset: String
         get() = sharedPreferences.getString(KEY_KEYBOARD_PRESET, "{}();,.=|&![]<>+-/*?:_") ?: "{}();,.=|&![]<>+-/*?:_"
         set(value) = sharedPreferences.edit().putString(KEY_KEYBOARD_PRESET, value).apply()

@@ -94,7 +94,7 @@ internal fun EditorToolbar(
         onNavigationClicked = onDrawerClicked,
         navigationActions = {
             IconButton(
-                iconResId = UiR.drawable.ic_file,
+                iconResId = UiR.drawable.ic_folder_open,
                 onClick = { menuType = MenuType.FILE },
                 contentDescription = stringResource(R.string.editor_menu_file),
                 anchor = {

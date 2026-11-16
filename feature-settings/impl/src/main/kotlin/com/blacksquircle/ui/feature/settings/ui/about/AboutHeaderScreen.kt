@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import com.blacksquircle.ui.core.extensions.daggerViewModel
 import com.blacksquircle.ui.ds.PreviewBackground
-import com.blacksquircle.ui.ds.divider.HorizontalDivider
 import com.blacksquircle.ui.ds.extensions.adaptiveIconPainterResource
 import com.blacksquircle.ui.ds.preference.Preference
 import com.blacksquircle.ui.ds.preference.PreferenceGroup
@@ -43,15 +42,12 @@ import com.blacksquircle.ui.ds.toolbar.Toolbar
 import com.blacksquircle.ui.feature.settings.BuildConfig
 import com.blacksquircle.ui.feature.settings.R
 import com.blacksquircle.ui.feature.settings.data.applicationName
-import com.blacksquircle.ui.feature.settings.data.versionCode
 import com.blacksquircle.ui.feature.settings.data.versionName
 import com.blacksquircle.ui.feature.settings.internal.SettingsComponent
 import com.blacksquircle.ui.ds.R as UiR
 
 private const val PRIVACY_POLICY_URL =
     "https://github.com/massivemadness/Squircle-CE/blob/master/PRIVACY-POLICY.md"
-private const val TRANSLATION_PLATFORM_URL = "https://crowdin.com/project/squircle-ce"
-private const val CONTRIBUTE_PROJECT_URL = "https://github.com/massivemadness/Squircle-CE"
 
 @Composable
 internal fun AboutHeaderScreen(
@@ -69,18 +65,6 @@ internal fun AboutHeaderScreen(
             }
             context.startActivity(intent)
         },
-        onTranslationClicked = {
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = TRANSLATION_PLATFORM_URL.toUri()
-            }
-            context.startActivity(intent)
-        },
-        onContributeClicked = {
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                data = CONTRIBUTE_PROJECT_URL.toUri()
-            }
-            context.startActivity(intent)
-        },
     )
 }
 
@@ -88,8 +72,6 @@ internal fun AboutHeaderScreen(
 private fun AboutHeaderScreen(
     onBackClicked: () -> Unit = {},
     onPrivacyClicked: () -> Unit = {},
-    onTranslationClicked: () -> Unit = {},
-    onContributeClicked: () -> Unit = {},
 ) {
     ScaffoldSuite(
         topBar = {
@@ -114,7 +96,6 @@ private fun AboutHeaderScreen(
                 subtitle = stringResource(
                     R.string.settings_about_subtitle,
                     LocalContext.current.appVersionName(),
-                    LocalContext.current.versionCode,
                 ),
                 leadingContent = {
                     Image(
@@ -127,20 +108,6 @@ private fun AboutHeaderScreen(
             Preference(
                 title = stringResource(R.string.settings_privacy_policy_title),
                 onClick = onPrivacyClicked,
-            )
-            HorizontalDivider()
-            PreferenceGroup(
-                title = stringResource(R.string.settings_category_contribute)
-            )
-            Preference(
-                title = stringResource(R.string.settings_translation_title),
-                subtitle = stringResource(R.string.settings_translation_subtitle),
-                onClick = onTranslationClicked,
-            )
-            Preference(
-                title = stringResource(R.string.settings_contribute_title),
-                subtitle = stringResource(R.string.settings_contribute_subtitle),
-                onClick = onContributeClicked,
             )
         }
     }

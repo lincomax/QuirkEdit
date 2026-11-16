@@ -27,6 +27,7 @@ import com.blacksquircle.ui.core.mvi.ViewEvent
 import com.blacksquircle.ui.core.provider.resources.StringProvider
 import com.blacksquircle.ui.core.settings.SettingsManager
 import com.blacksquircle.ui.ds.extensions.toHexString
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItems
 import com.blacksquircle.ui.feature.editor.R
 import com.blacksquircle.ui.feature.editor.api.interactor.EditorInteractor
 import com.blacksquircle.ui.feature.editor.api.model.EditorApiEvent
@@ -62,6 +63,9 @@ import com.blacksquircle.ui.feature.terminal.api.interactor.TerminalInteractor
 import com.blacksquircle.ui.feature.terminal.api.navigation.TerminalRoute
 import com.blacksquircle.ui.filesystem.base.model.FileModel
 import com.blacksquircle.ui.navigation.api.Navigator
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -74,9 +78,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.io.File
-import javax.inject.Inject
-import javax.inject.Provider
 import com.blacksquircle.ui.ds.R as UiR
 
 internal class EditorViewModel @Inject constructor(
@@ -1573,6 +1574,9 @@ internal class EditorViewModel @Inject constructor(
         readOnly = settingsManager.readOnly,
         extendedKeyboard = settingsManager.extendedKeyboard,
         miniToolbar = settingsManager.miniToolbar,
+        miniToolbarItems = MiniToolbarItems.parse(settingsManager.miniToolbarItems)
+            .filter { it.enabled }
+            .map { it.action },
         magnifier = settingsManager.magnifier,
         cursorHaptics = settingsManager.cursorHaptics,
         highlightColor = settingsManager.highlightColor,

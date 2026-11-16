@@ -420,12 +420,19 @@ private fun EditorScreen(
                         }
                         MiniToolbar(
                             currentDocument = viewState.currentDocument,
+                            items = viewState.settings.miniToolbarItems,
                             onOpenFileClicked = onOpenFileClicked,
+                            onNewFileClicked = onNewFileClicked,
                             onPasteClicked = onPasteClicked,
+                            onCopyClicked = onCopyClicked,
+                            onCutClicked = onCutClicked,
+                            onSelectAllClicked = onSelectAllClicked,
                             onUndoClicked = onUndoClicked,
                             onRedoClicked = onRedoClicked,
                             onFindClicked = onToggleFindClicked,
+                            onGoToLineClicked = onGoToLineClicked,
                             onSaveFileClicked = onSaveFileClicked,
+                            onSaveFileAsClicked = onSaveFileAsClicked,
                             onCloseFileClicked = onCloseFileClicked,
                         )
                     }

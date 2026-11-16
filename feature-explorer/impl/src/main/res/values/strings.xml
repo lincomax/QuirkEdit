@@ -19,6 +19,7 @@
 
     <string name="explorer_menu_sort_show_hidden">Show hidden files</string>
     <string name="explorer_menu_sort_compact_packages">Compact packages</string>
+    <string name="explorer_menu_sort_search_all_storage">Search all storage</string>
     <string name="explorer_menu_sort_by_name">Sort by Name</string>
     <string name="explorer_menu_sort_by_size">Sort by Size</string>
     <string name="explorer_menu_sort_by_date">Sort by Date</string>

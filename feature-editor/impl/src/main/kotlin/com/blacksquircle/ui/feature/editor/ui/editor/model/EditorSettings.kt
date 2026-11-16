@@ -19,6 +19,8 @@ package com.blacksquircle.ui.feature.editor.ui.editor.model
 import android.graphics.Typeface
 import androidx.compose.runtime.Immutable
 import com.blacksquircle.ui.core.provider.typeface.TypefaceProvider
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarAction
+import com.blacksquircle.ui.ds.toolbar.MiniToolbarItems
 import com.blacksquircle.ui.feature.shortcuts.api.model.Keybinding
 
 @Immutable
@@ -37,6 +39,8 @@ internal data class EditorSettings(
     val readOnly: Boolean = false,
     val extendedKeyboard: Boolean = false,
     val miniToolbar: Boolean = true,
+    val miniToolbarItems: List<MiniToolbarAction> =
+        MiniToolbarItems.DEFAULT.filter { it.enabled }.map { it.action },
     val magnifier: Boolean = true,
     val cursorHaptics: Boolean = true,
     val highlightColor: Int = 0,

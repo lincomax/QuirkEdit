@@ -108,25 +108,25 @@ internal fun MainScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                /** Status bar and navigation bar share one darker shade */
-                val systemBarColor = lerp(
+                /** Status bar: toolbar color dimmed; navigation bar: toolbar color */
+                val statusBarColor = lerp(
                     start = SquircleTheme.colors.colorBackgroundSecondary,
                     stop = Color.Black,
-                    fraction = if (SquircleTheme.colors.isDark) 0.3f else 0.12f,
+                    fraction = if (SquircleTheme.colors.isDark) 0.2f else 0.4f,
                 )
                 Box(
                     Modifier
                         .align(Alignment.TopStart)
                         .fillMaxWidth()
                         .windowInsetsTopHeight(WindowInsets.statusBars)
-                        .background(systemBarColor)
+                        .background(statusBarColor)
                 )
                 Box(
                     Modifier
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
                         .windowInsetsBottomHeight(WindowInsets.navigationBars)
-                        .background(systemBarColor)
+                        .background(SquircleTheme.colors.colorBackgroundSecondary)
                 )
             }
         }

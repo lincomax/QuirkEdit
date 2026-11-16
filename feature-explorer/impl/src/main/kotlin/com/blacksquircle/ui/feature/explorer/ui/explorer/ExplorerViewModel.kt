@@ -44,6 +44,7 @@ import com.blacksquircle.ui.feature.explorer.api.navigation.StorageDeniedRoute
 import com.blacksquircle.ui.feature.explorer.api.navigation.TaskRoute
 import com.blacksquircle.ui.feature.explorer.data.manager.TaskManager
 import com.blacksquircle.ui.feature.explorer.data.node.NodeBuilderOptions
+import com.blacksquircle.ui.feature.explorer.data.node.NodeMap
 import com.blacksquircle.ui.feature.explorer.data.node.async.AsyncNodeBuilder
 import com.blacksquircle.ui.feature.explorer.data.node.ensureCommonParentKey
 import com.blacksquircle.ui.feature.explorer.data.node.findNodeByKey
@@ -75,9 +76,17 @@ import com.blacksquircle.ui.filesystem.base.exception.SplitArchiveException
 import com.blacksquircle.ui.filesystem.base.exception.UnsupportedArchiveException
 import com.blacksquircle.ui.filesystem.base.model.AuthMethod
 import com.blacksquircle.ui.filesystem.base.model.FileType
+import com.blacksquircle.ui.filesystem.local.LocalFilesystem
 import com.blacksquircle.ui.navigation.api.Navigator
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -85,9 +94,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Provider
 import com.blacksquircle.ui.ds.R as UiR
 
 internal class ExplorerViewModel @Inject constructor(
@@ -120,6 +128,9 @@ internal class ExplorerViewModel @Inject constructor(
     private var showHidden = settingsManager.showHidden
     private var foldersOnTop = settingsManager.foldersOnTop
     private var compactPackages = settingsManager.compactPackages
+    private var searchAllStorage = settingsManager.searchAllStorage
+    private var searchResults: NodeMap? = null
+    private var searchJob: Job? = null
     private var sortMode = SortMode.of(settingsManager.sortMode)
 
     init {
@@ -162,6 +173,8 @@ internal class ExplorerViewModel @Inject constructor(
                 selectedWorkspace = workspace
 
                 cache.clear()
+                searchJob?.cancel()
+                searchResults = null
 
                 val rootNode = FileNode(
                     file = workspace.defaultLocation,
@@ -211,9 +224,7 @@ internal class ExplorerViewModel @Inject constructor(
         _viewState.update {
             it.copy(searchQuery = searchQuery)
         }
-        viewModelScope.launch {
-            updateNodeList()
-        }
+        startStorageSearch()
     }
 
     fun onClearQueryClicked() {
@@ -221,7 +232,78 @@ internal class ExplorerViewModel @Inject constructor(
         _viewState.update {
             it.copy(searchQuery = searchQuery)
         }
-        viewModelScope.launch {
+        startStorageSearch()
+    }
+
+    fun onSearchAllStorageClicked() {
+        searchAllStorage = !searchAllStorage
+        settingsManager.searchAllStorage = searchAllStorage
+        _viewState.update {
+            it.copy(searchAllStorage = searchAllStorage)
+        }
+        startStorageSearch()
+    }
+
+    /** Searches the whole local storage instead of only the folders opened so far */
+    private fun startStorageSearch() {
+        searchJob?.cancel()
+        searchResults = null
+        val query = searchQuery.trim()
+        val rootNode = cache[NodeKey.Root]?.firstOrNull()
+        val canSearch = searchAllStorage && query.isNotEmpty() &&
+            rootNode != null && rootNode.file.filesystemUuid == LocalFilesystem.LOCAL_UUID
+        searchJob = viewModelScope.launch {
+            updateNodeList()
+            if (!canSearch || rootNode == null) return@launch
+            delay(SEARCH_DEBOUNCE)
+            val results = withContext(Dispatchers.IO) {
+                val rootDir = File(rootNode.file.path)
+                val nodeMap = NodeMap()
+                nodeMap[NodeKey.Root] = listOf(rootNode.copy(isExpanded = true))
+                val children = HashMap<NodeKey, LinkedHashMap<String, FileNode>>()
+
+                fun addWithParents(file: File) {
+                    val chain = generateSequence(file) { it.parentFile }
+                        .takeWhile { it.path != rootDir.path }
+                        .toList()
+                        .asReversed()
+                    var parentKey: NodeKey = rootNode.key
+                    var depth = rootNode.depth + 1
+                    for (item in chain) {
+                        val fileModel = LocalFilesystem.toFileModel(item)
+                        val siblings = children.getOrPut(parentKey) { LinkedHashMap() }
+                        val node = siblings.getOrPut(fileModel.fileUri) {
+                            FileNode(
+                                file = fileModel,
+                                depth = depth,
+                                displayIcon = fileIconProvider.fileIcon(fileModel),
+                                isExpanded = fileModel.isDirectory,
+                            )
+                        }
+                        parentKey = node.key
+                        depth++
+                    }
+                }
+
+                rootDir.walkTopDown()
+                    .onEnter { dir ->
+                        ensureActive()
+                        dir == rootDir || (showHidden || !dir.name.startsWith('.'))
+                    }
+                    .filter { file ->
+                        file != rootDir &&
+                            (showHidden || !file.name.startsWith('.')) &&
+                            file.name.contains(query, ignoreCase = true)
+                    }
+                    .take(SEARCH_MAX_RESULTS)
+                    .forEach(::addWithParents)
+
+                for ((key, nodes) in children) {
+                    nodeMap[key] = nodes.values.toList()
+                }
+                nodeMap
+            }
+            searchResults = results
             updateNodeList()
         }
     }
@@ -232,9 +314,7 @@ internal class ExplorerViewModel @Inject constructor(
         _viewState.update {
             it.copy(showHidden = showHidden)
         }
-        viewModelScope.launch {
-            updateNodeList()
-        }
+        startStorageSearch()
     }
 
     fun onCompactPackagesClicked() {
@@ -265,6 +345,14 @@ internal class ExplorerViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
+            val results = searchResults
+            if (fileNode.isDirectory && results != null) {
+                results.updateNode(fileNode) {
+                    it.copy(isExpanded = !fileNode.isExpanded)
+                }
+                updateNodeList()
+                return@launch
+            }
             if (fileNode.isDirectory) {
                 val cacheNode = cache[fileNode.key]
                 if (cacheNode != null) {
@@ -894,6 +982,8 @@ internal class ExplorerViewModel @Inject constructor(
                         selectedWorkspace = workspace
 
                         cache.clear()
+                        searchJob?.cancel()
+                        searchResults = null
                         resetBuffer()
 
                         val rootNode = FileNode(
@@ -913,6 +1003,7 @@ internal class ExplorerViewModel @Inject constructor(
                             searchQuery = searchQuery,
                             showHidden = showHidden,
                             compactPackages = compactPackages,
+                            searchAllStorage = searchAllStorage,
                             sortMode = sortMode,
                         )
                     }
@@ -1112,10 +1203,15 @@ internal class ExplorerViewModel @Inject constructor(
             foldersOnTop = foldersOnTop,
             compactPackages = compactPackages,
         )
-        val fileNodes = asyncNodeBuilder.buildNodeList(cache, options)
+        val fileNodes = asyncNodeBuilder.buildNodeList(searchResults ?: cache, options)
         _viewState.update {
             it.copy(fileNodes = fileNodes)
         }
+    }
+
+    companion object {
+        private const val SEARCH_DEBOUNCE = 300L
+        private const val SEARCH_MAX_RESULTS = 500
     }
 
     class Factory : ViewModelProvider.Factory {

@@ -16,6 +16,8 @@
 
 package com.blacksquircle.ui.feature.settings.ui.application
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -51,12 +53,24 @@ internal fun AppHeaderScreen(
     }
 ) {
     val viewState by viewModel.viewState.collectAsStateWithLifecycle()
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri -> if (uri != null) viewModel.onExportSettings(uri) }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri -> if (uri != null) viewModel.onImportSettings(uri) }
     AppHeaderScreen(
         viewState = viewState,
         onBackClicked = viewModel::onBackClicked,
         onColorSchemeClicked = viewModel::onColorSchemeClicked,
         onFullscreenChanged = viewModel::onFullscreenChanged,
         onConfirmExitChanged = viewModel::onConfirmExitChanged,
+        onExportClicked = {
+            exportLauncher.launch("quirkedit-settings.json")
+        },
+        onImportClicked = {
+            importLauncher.launch(arrayOf("application/json", "text/*", "application/octet-stream"))
+        },
     )
 
     val context = LocalContext.current
@@ -76,6 +90,8 @@ private fun AppHeaderScreen(
     onColorSchemeClicked: () -> Unit = {},
     onFullscreenChanged: (Boolean) -> Unit = {},
     onConfirmExitChanged: (Boolean) -> Unit = {},
+    onExportClicked: () -> Unit = {},
+    onImportClicked: () -> Unit = {},
 ) {
     ScaffoldSuite(
         topBar = {
@@ -115,6 +131,20 @@ private fun AppHeaderScreen(
                 subtitle = stringResource(R.string.settings_confirm_exit_subtitle),
                 checked = viewState.confirmExit,
                 onCheckedChange = onConfirmExitChanged,
+            )
+            HorizontalDivider()
+            PreferenceGroup(
+                title = stringResource(R.string.settings_category_backup)
+            )
+            Preference(
+                title = stringResource(R.string.settings_export_title),
+                subtitle = stringResource(R.string.settings_export_subtitle),
+                onClick = onExportClicked,
+            )
+            Preference(
+                title = stringResource(R.string.settings_import_title),
+                subtitle = stringResource(R.string.settings_import_subtitle),
+                onClick = onImportClicked,
             )
         }
     }
