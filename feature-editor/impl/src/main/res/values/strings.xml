@@ -66,6 +66,7 @@
     <string name="editor_menu_mini_toolbar" translatable="false">Mini Toolbar</string>
     <string name="editor_menu_word_wrap" translatable="false">Word Wrap</string>
     <string name="editor_menu_symbol_bar" translatable="false">Symbol Bar</string>
+    <string name="editor_menu_share">Share</string>
     <string name="editor_menu_statistics" translatable="false">Statistics</string>
     <string name="editor_statistics_lines" translatable="false">Lines</string>
     <string name="editor_statistics_words" translatable="false">Words</string>

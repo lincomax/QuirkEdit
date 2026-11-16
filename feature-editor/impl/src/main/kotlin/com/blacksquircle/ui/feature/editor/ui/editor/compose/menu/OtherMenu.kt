@@ -38,6 +38,7 @@ internal fun OtherMenu(
     wordWrap: Boolean = false,
     readOnly: Boolean = false,
     onFindClicked: () -> Unit = {},
+    onShareClicked: () -> Unit = {},
     onGoToLineClicked: () -> Unit = {},
     onForceSyntaxClicked: () -> Unit = {},
     onStatisticsClicked: () -> Unit = {},
@@ -59,6 +60,11 @@ internal fun OtherMenu(
             title = stringResource(R.string.editor_menu_search),
             iconResId = UiR.drawable.ic_search,
             onClick = onFindClicked,
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_share),
+            iconResId = UiR.drawable.ic_share,
+            onClick = onShareClicked,
         )
         PopupMenuItem(
             title = stringResource(R.string.editor_menu_goto_line),

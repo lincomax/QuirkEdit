@@ -76,6 +76,7 @@ import com.blacksquircle.ui.feature.editor.ui.editor.compose.ExternalChangeDialo
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.MiniToolbar
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.SearchPanel
 import com.blacksquircle.ui.feature.editor.ui.editor.compose.StatisticsDialog
+import com.blacksquircle.ui.feature.editor.ui.editor.compose.shareDocument
 import com.blacksquircle.ui.feature.editor.ui.editor.model.DocumentState
 import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorController
 import com.blacksquircle.ui.feature.editor.ui.editor.model.ErrorAction
@@ -343,6 +344,7 @@ private fun EditorScreen(
         )
     }
 
+    val shareContext = LocalContext.current
     var showStatistics by remember { mutableStateOf(false) }
     val statisticsContent = viewState.currentDocument?.content
     if (showStatistics && statisticsContent != null) {
@@ -376,6 +378,9 @@ private fun EditorScreen(
                 onFindClicked = onToggleFindClicked,
                 onGoToLineClicked = onGoToLineClicked,
                 onStatisticsClicked = { showStatistics = true },
+                onShareClicked = {
+                    viewState.currentDocument?.let { shareContext.shareDocument(it) }
+                },
                 onForceSyntaxClicked = onForceSyntaxClicked,
                 onInsertColorClicked = onInsertColorClicked,
                 onFetchClicked = onFetchClicked,
