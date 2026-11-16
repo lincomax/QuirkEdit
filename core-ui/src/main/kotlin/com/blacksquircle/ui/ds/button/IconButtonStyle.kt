@@ -38,18 +38,18 @@ object IconButtonStyleDefaults {
             disabledIconColor = SquircleTheme.colors.colorTextAndIconDisabled,
         )
 
-    /** Bottom toolbar: translucent white on dark, translucent grey on light */
+    /** Bottom toolbar: header icon color, translucent when disabled */
     val Accessory: IconButtonStyle
         @Composable
         @ReadOnlyComposable
         get() = if (SquircleTheme.colors.isDark) {
             IconButtonStyle(
-                iconColor = Color.White.copy(alpha = 0.8f),
+                iconColor = SquircleTheme.colors.colorTextAndIconSecondary,
                 disabledIconColor = Color.White.copy(alpha = 0.3f),
             )
         } else {
             IconButtonStyle(
-                iconColor = Color(0xFF333333).copy(alpha = 0.6f),
+                iconColor = SquircleTheme.colors.colorTextAndIconSecondary,
                 disabledIconColor = Color(0xFF333333).copy(alpha = 0.22f),
             )
         }

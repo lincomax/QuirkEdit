@@ -47,7 +47,8 @@ import com.blacksquircle.ui.feature.settings.internal.SettingsComponent
 import com.blacksquircle.ui.ds.R as UiR
 
 private const val PRIVACY_POLICY_URL =
-    "https://github.com/massivemadness/Squircle-CE/blob/master/PRIVACY-POLICY.md"
+    "https://github.com/lincomax/SquickEdit/blob/master/PRIVACY-POLICY.md"
+private const val PROJECT_URL = "https://github.com/lincomax/SquickEdit"
 
 @Composable
 internal fun AboutHeaderScreen(
@@ -59,6 +60,12 @@ internal fun AboutHeaderScreen(
     val context = LocalContext.current
     AboutHeaderScreen(
         onBackClicked = viewModel::onBackClicked,
+        onVersionClicked = {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                data = PROJECT_URL.toUri()
+            }
+            context.startActivity(intent)
+        },
         onPrivacyClicked = {
             val intent = Intent(Intent.ACTION_VIEW).apply {
                 data = PRIVACY_POLICY_URL.toUri()
@@ -71,6 +78,7 @@ internal fun AboutHeaderScreen(
 @Composable
 private fun AboutHeaderScreen(
     onBackClicked: () -> Unit = {},
+    onVersionClicked: () -> Unit = {},
     onPrivacyClicked: () -> Unit = {},
 ) {
     ScaffoldSuite(
@@ -97,6 +105,7 @@ private fun AboutHeaderScreen(
                     R.string.settings_about_subtitle,
                     LocalContext.current.appVersionName(),
                 ),
+                onClick = onVersionClicked,
                 leadingContent = {
                     Image(
                         painter = adaptiveIconPainterResource(UiR.mipmap.ic_launcher),

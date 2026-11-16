@@ -129,7 +129,6 @@ internal fun EditorToolbar(
                         onSelectLineClicked = { menuType = null; onSelectLineClicked() },
                         onDeleteLineClicked = { menuType = null; onDeleteLineClicked() },
                         onDuplicateLineClicked = { menuType = null; onDuplicateLineClicked() },
-                        onInsertColorClicked = { menuType = null; onInsertColorClicked() },
                     )
                 }
             )
@@ -149,6 +148,7 @@ internal fun EditorToolbar(
                         onFindClicked = { menuType = null; onFindClicked() },
                         onGoToLineClicked = { menuType = null; onGoToLineClicked() },
                         onForceSyntaxClicked = { menuType = null; onForceSyntaxClicked() },
+                        onInsertColorClicked = { menuType = null; onInsertColorClicked() },
                         onStatisticsClicked = { menuType = null; onStatisticsClicked() },
                         onGitClicked = { menuType = MenuType.GIT },
                         onTerminalClicked = {
