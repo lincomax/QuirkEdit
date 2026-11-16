@@ -38,7 +38,7 @@ data class ToolbarSize(
 
 object ToolbarSizeDefaults {
 
-    /** Compact 48dp bar with a 16sp title and 12sp subtitle */
+    /** Compact 48dp bar with a 15sp title and 11sp subtitle */
     val S: ToolbarSize
         get() = ToolbarSize(
             height = 48.dp,

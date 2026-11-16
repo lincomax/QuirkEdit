@@ -53,7 +53,7 @@ internal fun ToolbarContent(
             Text(
                 text = title,
                 style = if (toolbarSize.compactText) {
-                    SquircleTheme.typography.text16Regular
+                    SquircleTheme.typography.text16Regular.copy(fontSize = 15.sp)
                 } else {
                     SquircleTheme.typography.text18Medium
                 },
@@ -68,7 +68,11 @@ internal fun ToolbarContent(
 
             Text(
                 text = subtitle,
-                style = SquircleTheme.typography.text12Regular,
+                style = if (toolbarSize.compactText) {
+                    SquircleTheme.typography.text12Regular.copy(fontSize = 11.sp)
+                } else {
+                    SquircleTheme.typography.text12Regular
+                },
                 color = SquircleTheme.colors.colorTextAndIconSecondary,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,

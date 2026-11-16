@@ -65,6 +65,7 @@ internal fun DocumentTabLayout(
                     name = state.document.displayName,
                     modified = state.document.modified,
                     selected = i == selectedIndex,
+                    showSeparator = i < tabs.lastIndex,
                     onDocumentClicked = { onDocumentClicked(state) },
                     onCloseClicked = { onCloseClicked(state) },
                     onCloseOthersClicked = { onCloseOthersClicked(state) },

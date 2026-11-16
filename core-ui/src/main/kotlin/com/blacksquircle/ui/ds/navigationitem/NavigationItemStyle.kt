@@ -40,9 +40,9 @@ object NavigationItemStyleDefaults {
         @ReadOnlyComposable
         get() = NavigationItemStyle(
             selectionColor = SquircleTheme.colors.colorBackgroundTertiary,
-            iconColorSelected = SquircleTheme.colors.colorTextAndIconPrimary,
+            iconColorSelected = SquircleTheme.colors.colorTextAndIconSecondary,
             iconColorUnselected = SquircleTheme.colors.colorTextAndIconSecondary,
-            textColorSelected = SquircleTheme.colors.colorTextAndIconPrimary,
+            textColorSelected = SquircleTheme.colors.colorTextAndIconSecondary,
             textColorUnselected = SquircleTheme.colors.colorTextAndIconSecondary,
             disabledIconColor = SquircleTheme.colors.colorTextAndIconDisabled,
             disabledTextColor = SquircleTheme.colors.colorTextAndIconDisabled,

@@ -69,7 +69,7 @@ fun EmptyView(
             Spacer(Modifier.height(12.dp))
             Text(
                 text = title,
-                color = SquircleTheme.colors.colorTextAndIconPrimary,
+                color = SquircleTheme.colors.colorTextAndIconSecondary,
                 style = SquircleTheme.typography.header20Bold,
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,

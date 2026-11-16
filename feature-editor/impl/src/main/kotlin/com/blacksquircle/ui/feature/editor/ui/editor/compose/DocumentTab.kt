@@ -44,6 +44,7 @@ internal fun DocumentTab(
     modified: Boolean,
     selected: Boolean,
     modifier: Modifier = Modifier,
+    showSeparator: Boolean = true,
     onDocumentClicked: () -> Unit = {},
     onCloseClicked: () -> Unit = {},
     onCloseOthersClicked: () -> Unit = {},
@@ -68,12 +69,14 @@ internal fun DocumentTab(
         trailingContent = {
             /** Separator between tabs */
             Spacer(Modifier.width(16.dp))
-            Box(
-                Modifier
-                    .width(1.dp)
-                    .height(22.dp)
-                    .background(SquircleTheme.colors.colorTextAndIconDisabled)
-            )
+            if (showSeparator) {
+                Box(
+                    Modifier
+                        .width(1.dp)
+                        .height(22.dp)
+                        .background(SquircleTheme.colors.colorTextAndIconDisabled)
+                )
+            }
         },
         anchor = {
             CloseMenu(
