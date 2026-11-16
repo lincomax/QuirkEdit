@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.blacksquircle.ui.core.contract.PermissionResult
 import com.blacksquircle.ui.core.contract.rememberStorageContract
@@ -40,6 +41,7 @@ import com.blacksquircle.ui.core.effect.CleanupEffect
 import com.blacksquircle.ui.core.effect.ResultEffect
 import com.blacksquircle.ui.core.extensions.copyText
 import com.blacksquircle.ui.core.extensions.daggerViewModel
+import com.blacksquircle.ui.core.extensions.isStorageAccessGranted
 import com.blacksquircle.ui.core.extensions.showToast
 import com.blacksquircle.ui.core.mvi.ViewEvent
 import com.blacksquircle.ui.ds.PreviewBackground
@@ -127,6 +129,11 @@ internal fun ExplorerScreen(
     }
 
     val context = LocalContext.current
+    LifecycleResumeEffect(Unit) {
+        viewModel.onResumed(context.isStorageAccessGranted())
+        onPauseOrDispose {}
+    }
+
     LaunchedEffect(Unit) {
         viewModel.viewEvent.collect { event ->
             when (event) {

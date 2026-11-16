@@ -635,6 +635,16 @@ internal class ExplorerViewModel @Inject constructor(
         navigator.navigate(StorageDeniedRoute)
     }
 
+    /** Coming back from system settings: reload if access was granted there */
+    fun onResumed(storageAccessGranted: Boolean) {
+        val rootNode = cache[NodeKey.Root]?.firstOrNull() ?: return
+        if (storageAccessGranted &&
+            rootNode.errorState?.action == ErrorAction.REQUEST_PERMISSIONS
+        ) {
+            loadFiles(rootNode)
+        }
+    }
+
     fun onPermissionGranted() {
         val rootNode = cache[NodeKey.Root]?.firstOrNull()
         if (rootNode != null) {
