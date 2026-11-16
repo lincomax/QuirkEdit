@@ -41,6 +41,7 @@ internal fun EditMenu(
     onSelectLineClicked: () -> Unit = {},
     onDeleteLineClicked: () -> Unit = {},
     onDuplicateLineClicked: () -> Unit = {},
+    onInsertColorClicked: () -> Unit = {},
 ) {
     PopupMenu(
         expanded = expanded,
@@ -94,6 +95,11 @@ internal fun EditMenu(
             title = stringResource(R.string.editor_menu_edit_duplicate_line),
             iconResId = UiR.drawable.ic_line_duplicate,
             onClick = onDuplicateLineClicked,
+        )
+        PopupMenuItem(
+            title = stringResource(R.string.editor_menu_tools_insert_color),
+            iconResId = UiR.drawable.ic_palette,
+            onClick = onInsertColorClicked,
         )
     }
 }

@@ -40,7 +40,6 @@ internal fun OtherMenu(
     onFindClicked: () -> Unit = {},
     onGoToLineClicked: () -> Unit = {},
     onForceSyntaxClicked: () -> Unit = {},
-    onInsertColorClicked: () -> Unit = {},
     onStatisticsClicked: () -> Unit = {},
     onGitClicked: () -> Unit = {},
     onTerminalClicked: () -> Unit = {},
@@ -70,11 +69,6 @@ internal fun OtherMenu(
             title = stringResource(R.string.editor_menu_syntax),
             iconResId = UiR.drawable.ic_syntax,
             onClick = onForceSyntaxClicked,
-        )
-        PopupMenuItem(
-            title = stringResource(R.string.editor_menu_tools_insert_color),
-            iconResId = UiR.drawable.ic_palette,
-            onClick = onInsertColorClicked,
         )
         PopupMenuItem(
             title = stringResource(R.string.editor_menu_statistics),
