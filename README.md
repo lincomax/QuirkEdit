@@ -9,22 +9,21 @@ A text and code editor for Android, based on [Squircle CE](https://github.com/ma
 
 ## Features
 
-* Tabs for multiple open files, with unsaved files marked `*name`
-* File, Edit and More menus, plus a bottom toolbar for common actions
+* Tabs for multiple open files
+* Optional bottom toolbar for common actions
+* Optional bottom symbols bar
 * Light, Dark, and Black themes with syntax highlighting
-* Word wrap, read-only mode, go to line, search and statistics
-* Asks to reload a file when another app changes it
-* Optional symbol bar, magnifier, and haptic feedback
-
-## Download
-
-Get the latest APK from [Releases](../../releases).
-
-To get updates automatically, add this repository's address to ObtainX or Obtainium.
+* Word wrap, read-only mode, go to line, search, and character statistics
+* Detects external file changes and offers to reload
+* Standard Android magnifier and text selection haptics
+* Additional Roboto font option
+* Search all storage from file browser
 
 ## License
 
 ```
+Copyright Squircle CE contributors.
+
 Copyright Squircle CE contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
