@@ -48,7 +48,9 @@ import io.github.rosemoe.sora.text.Content
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 internal class DocumentRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
@@ -221,6 +223,29 @@ internal class DocumentRepositoryImpl(
                 Content(text).also { content ->
                     cacheDocument(document, content)
                 }
+            }
+        }
+    }
+
+    /** The file's text as it is on disk, ignoring cached edits */
+    override suspend fun loadSavedText(document: DocumentModel): String? {
+        return withContext(dispatcherProvider.io()) {
+            if (document.isUntitled || !context.isStorageAccessGranted()) {
+                return@withContext null
+            }
+            try {
+                val filesystem = filesystemFactory.create(document.filesystemUuid)
+                val fileModel = DocumentMapper.toModel(document)
+                val fileParams = FileParams(
+                    chardet = settingsManager.encodingAutoDetect,
+                    charset = charsetFor(settingsManager.encodingForOpening),
+                )
+                Content(filesystem.loadFile(fileModel, fileParams)).toString()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.w(e, e.message)
+                null
             }
         }
     }

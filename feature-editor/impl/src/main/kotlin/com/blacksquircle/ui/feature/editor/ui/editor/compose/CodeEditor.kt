@@ -16,6 +16,7 @@
 
 package com.blacksquircle.ui.feature.editor.ui.editor.compose
 
+import android.util.TypedValue
 import android.view.KeyEvent
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
@@ -89,6 +90,10 @@ internal fun CodeEditor(
         factory = { view },
         update = { editor ->
             editor.setTextSize(settings.fontSize)
+            /** 2sp extra space between lines */
+            editor.lineSpacingExtra = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP, 2f, editor.resources.displayMetrics
+            )
             editor.isWordwrap = settings.wordWrap
             editor.props.stickyScroll = settings.stickyScroll
             editor.isScalable = settings.pinchZoom

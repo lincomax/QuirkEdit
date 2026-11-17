@@ -35,6 +35,7 @@ internal interface DocumentRepository {
     suspend fun acceptExternalChange(document: DocumentModel)
     suspend fun saveUntitledAs(document: DocumentModel, content: Content, fileUri: Uri): DocumentModel
     suspend fun loadDocument(document: DocumentModel): Content
+    suspend fun loadSavedText(document: DocumentModel): String?
     suspend fun saveDocument(document: DocumentModel, content: Content)
     suspend fun cacheDocument(document: DocumentModel, content: Content)
     suspend fun updateDocument(document: DocumentModel)

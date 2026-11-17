@@ -47,8 +47,8 @@ import com.blacksquircle.ui.feature.settings.internal.SettingsComponent
 import com.blacksquircle.ui.ds.R as UiR
 
 private const val PRIVACY_POLICY_URL =
-    "https://github.com/lincomax/SquickEdit/blob/master/PRIVACY-POLICY.md"
-private const val PROJECT_URL = "https://github.com/lincomax/SquickEdit"
+    "https://github.com/lincomax/QuirkEdit/blob/master/PRIVACY-POLICY.md"
+private const val PROJECT_URL = "https://github.com/lincomax/QuirkEdit"
 
 @Composable
 internal fun AboutHeaderScreen(

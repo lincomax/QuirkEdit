@@ -25,12 +25,12 @@ import com.blacksquircle.ui.feature.shortcuts.api.model.Keybinding
 
 @Immutable
 internal data class EditorSettings(
-    val fontSize: Float = 14f,
+    val fontSize: Float = 16f,
     val fontType: Typeface = TypefaceProvider.DEFAULT,
-    val wordWrap: Boolean = false,
+    val wordWrap: Boolean = true,
     val stickyScroll: Boolean = false,
     val codeCompletion: Boolean = true,
-    val pinchZoom: Boolean = true,
+    val pinchZoom: Boolean = false,
     val lineNumbers: Boolean = true,
     val highlightCurrentLine: Boolean = true,
     val highlightMatchingDelimiters: Boolean = true,

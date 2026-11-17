@@ -188,14 +188,14 @@ class SettingsManager(private val context: Context) {
         set(value) = sharedPreferences.edit().putBoolean(KEY_CONFIRM_EXIT, value).apply()
 
     var fontSize: Int
-        get() = sharedPreferences.getInt(KEY_FONT_SIZE, 14)
+        get() = sharedPreferences.getInt(KEY_FONT_SIZE, 16)
         set(value) = sharedPreferences.edit().putInt(KEY_FONT_SIZE, value).apply()
     var fontType: String
         get() = sharedPreferences.getString(KEY_FONT_TYPE, "system_default") ?: "system_default"
         set(value) = sharedPreferences.edit().putString(KEY_FONT_TYPE, value).apply()
 
     var wordWrap: Boolean
-        get() = sharedPreferences.getBoolean(KEY_WORD_WRAP, false)
+        get() = sharedPreferences.getBoolean(KEY_WORD_WRAP, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_WORD_WRAP, value).apply()
     var stickyScroll: Boolean
         get() = sharedPreferences.getBoolean(KEY_STICKY_SCROLL, false)
@@ -204,7 +204,7 @@ class SettingsManager(private val context: Context) {
         get() = sharedPreferences.getBoolean(KEY_CODE_COMPLETION, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_CODE_COMPLETION, value).apply()
     var pinchZoom: Boolean
-        get() = sharedPreferences.getBoolean(KEY_PINCH_ZOOM, true)
+        get() = sharedPreferences.getBoolean(KEY_PINCH_ZOOM, false)
         set(value) = sharedPreferences.edit().putBoolean(KEY_PINCH_ZOOM, value).apply()
     var lineNumbers: Boolean
         get() = sharedPreferences.getBoolean(KEY_LINE_NUMBERS, true)

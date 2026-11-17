@@ -63,6 +63,7 @@ import com.blacksquircle.ui.feature.terminal.api.interactor.TerminalInteractor
 import com.blacksquircle.ui.feature.terminal.api.navigation.TerminalRoute
 import com.blacksquircle.ui.filesystem.base.model.FileModel
 import com.blacksquircle.ui.navigation.api.Navigator
+import io.github.rosemoe.sora.text.Content
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Provider
@@ -101,6 +102,18 @@ internal class EditorViewModel @Inject constructor(
 
     private var documents = emptyList<DocumentState>()
     private var selectedPosition = -1
+
+    /** Text of each open file as last loaded or saved, so undoing back to it clears the * */
+    private val savedTexts = HashMap<String, String>()
+
+    private fun markSaved(uuid: String, content: Content) {
+        savedTexts[uuid] = content.toString()
+    }
+
+    private fun isUnchanged(uuid: String, content: Content): Boolean {
+        val saved = savedTexts[uuid] ?: return false
+        return saved.length == content.length && saved == content.toString()
+    }
     private var settings = EditorSettings()
     private var currentJob: Job? = null
 
@@ -182,6 +195,7 @@ internal class EditorViewModel @Inject constructor(
                 }
 
                 documentRepository.saveDocument(updatedDocument, content)
+                markSaved(updatedDocument.uuid, content)
 
                 val message = stringProvider.getString(R.string.editor_toast_file_saved)
                 _viewEvent.send(ViewEvent.Toast(message))
@@ -231,6 +245,7 @@ internal class EditorViewModel @Inject constructor(
                         content = content,
                         fileUri = fileUri,
                     )
+                    markSaved(savedDocument.uuid, content)
                     documents = documents.mapSelected { state ->
                         state.copy(document = savedDocument)
                     }
@@ -410,16 +425,17 @@ internal class EditorViewModel @Inject constructor(
 
                 val canUndo = content.canUndo()
                 val canRedo = content.canRedo()
+                val modified = !isUnchanged(document.uuid, content)
 
                 val needsUpdate =
-                    !document.modified ||
+                    document.modified != modified ||
                         documentState.canUndo != canUndo ||
                         documentState.canRedo != canRedo
 
                 if (!needsUpdate) return@launch
 
-                val updatedDocument = if (!document.modified) {
-                    document.copy(modified = true)
+                val updatedDocument = if (document.modified != modified) {
+                    document.copy(modified = modified)
                 } else {
                     document
                 }
@@ -435,8 +451,8 @@ internal class EditorViewModel @Inject constructor(
                     it.copy(documents = documents)
                 }
 
-                if (!document.modified) {
-                    documentRepository.changeModified(updatedDocument, true)
+                if (document.modified != modified) {
+                    documentRepository.changeModified(updatedDocument, modified)
                 }
             } catch (e: CancellationException) {
                 throw e
@@ -1107,6 +1123,7 @@ internal class EditorViewModel @Inject constructor(
                     .orEmpty()
 
                 documentRepository.closeDocument(document)
+                savedTexts.remove(document.uuid)
 
                 if (reloadFile) {
                     /** If selected file is still loading, cancel request */
@@ -1269,6 +1286,7 @@ internal class EditorViewModel @Inject constructor(
 
                 if (autoSaveFiles) {
                     documentRepository.saveDocument(updatedDocument, content)
+                    markSaved(updatedDocument.uuid, content)
                 } else {
                     documentRepository.cacheDocument(updatedDocument, content)
                 }
@@ -1389,6 +1407,7 @@ internal class EditorViewModel @Inject constructor(
                         if (state.content != null) {
                             if (autoSaveFiles) {
                                 documentRepository.saveDocument(updatedDocument, state.content)
+                                markSaved(updatedDocument.uuid, state.content)
                             } else {
                                 documentRepository.cacheDocument(updatedDocument, state.content)
                             }
@@ -1428,6 +1447,20 @@ internal class EditorViewModel @Inject constructor(
                 val content = documentRepository.loadDocument(document)
                 languageInteractor.registerGrammar(document.language)
                 ensureActive()
+
+                val loaded = documents.getOrNull(selectedPosition)?.document ?: document
+                if (!loaded.modified) {
+                    markSaved(loaded.uuid, content)
+                } else if (loaded.uuid !in savedTexts) {
+                    /** Reopened with unsaved changes: compare against the file itself */
+                    viewModelScope.launch {
+                        val text = documentRepository.loadSavedText(loaded) ?: return@launch
+                        if (loaded.uuid !in savedTexts) {
+                            savedTexts[loaded.uuid] = text
+                            onContentChanged()
+                        }
+                    }
+                }
 
                 documents = documents.mapSelected {
                     it.copy(
