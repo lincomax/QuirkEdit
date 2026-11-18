@@ -246,6 +246,8 @@ internal class EditorViewModel @Inject constructor(
                         fileUri = fileUri,
                     )
                     markSaved(savedDocument.uuid, content)
+                    /** The new extension can mean a new language, e.g. .html */
+                    languageInteractor.registerGrammar(savedDocument.language)
                     documents = documents.mapSelected { state ->
                         state.copy(document = savedDocument)
                     }

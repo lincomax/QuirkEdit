@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import com.blacksquircle.ui.feature.editor.R
 import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorCommand
 import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorController
 import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorSettings
@@ -111,18 +112,33 @@ internal fun CodeEditor(
             editor.highlightColor = settings.highlightColor
             editor.cursorHaptics = settings.cursorHaptics
 
-            val editorLanguage = editor.createFromRegistry(
-                language = language,
-                codeCompletion = settings.codeCompletion,
-                autoIndentation = settings.autoIndentation,
-                autoClosePairs = settings.autoClosePairs,
-                useTab = !settings.useSpacesInsteadOfTabs,
-                tabSize = settings.tabWidth,
+            /** Only rebuild the language when its inputs change */
+            val languageKey = listOf(
+                language,
+                settings.codeCompletion,
+                settings.autoIndentation,
+                settings.autoClosePairs,
+                settings.useSpacesInsteadOfTabs,
+                settings.tabWidth,
             )
-            editor.setEditorLanguage(editorLanguage)
-            editor.setText(content)
-            editor.scroller.startScroll(0, 0, content.scrollX, content.scrollY, 0)
-            editor.scroller.abortAnimation()
+            if (editor.getTag(R.id.editor_language_key) != languageKey) {
+                editor.setTag(R.id.editor_language_key, languageKey)
+                val editorLanguage = editor.createFromRegistry(
+                    language = language,
+                    codeCompletion = settings.codeCompletion,
+                    autoIndentation = settings.autoIndentation,
+                    autoClosePairs = settings.autoClosePairs,
+                    useTab = !settings.useSpacesInsteadOfTabs,
+                    tabSize = settings.tabWidth,
+                )
+                editor.setEditorLanguage(editorLanguage)
+            }
+            /** Re-setting the same text would jump the cursor and scroll back to the saved spot */
+            if (editor.text !== content) {
+                editor.setText(content)
+                editor.scroller.startScroll(0, 0, content.scrollX, content.scrollY, 0)
+                editor.scroller.abortAnimation()
+            }
         },
         onRelease = CodeEditor::release,
         modifier = modifier,
