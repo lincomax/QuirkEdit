@@ -152,8 +152,15 @@ internal fun CodeEditor(
                 is EditorCommand.Copy -> view.copyText()
                 is EditorCommand.Paste -> view.pasteText()
 
-                is EditorCommand.Undo -> view.undo()
-                is EditorCommand.Redo -> view.redo()
+                is EditorCommand.Undo -> {
+                    view.undo()
+                    /** Change events fire before the undo stack moves, so refresh once it's done */
+                    onContentChanged()
+                }
+                is EditorCommand.Redo -> {
+                    view.redo()
+                    onContentChanged()
+                }
                 is EditorCommand.SelectAll -> view.selectAll()
                 is EditorCommand.SelectLine -> view.selectLine()
                 is EditorCommand.DeleteLine -> view.deleteLine()
