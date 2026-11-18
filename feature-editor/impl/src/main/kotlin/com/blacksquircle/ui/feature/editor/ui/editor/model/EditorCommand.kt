@@ -22,6 +22,9 @@ internal sealed class EditorCommand {
     data object Copy : EditorCommand()
     data object Paste : EditorCommand()
 
+    data object Undo : EditorCommand()
+    data object Redo : EditorCommand()
+
     data object SelectAll : EditorCommand()
     data object SelectLine : EditorCommand()
     data object DeleteLine : EditorCommand()

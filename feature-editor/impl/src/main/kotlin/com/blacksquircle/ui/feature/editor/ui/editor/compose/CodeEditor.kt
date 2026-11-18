@@ -152,6 +152,8 @@ internal fun CodeEditor(
                 is EditorCommand.Copy -> view.copyText()
                 is EditorCommand.Paste -> view.pasteText()
 
+                is EditorCommand.Undo -> view.undo()
+                is EditorCommand.Redo -> view.redo()
                 is EditorCommand.SelectAll -> view.selectAll()
                 is EditorCommand.SelectLine -> view.selectLine()
                 is EditorCommand.DeleteLine -> view.deleteLine()

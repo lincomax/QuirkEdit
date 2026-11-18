@@ -582,61 +582,23 @@ internal class EditorViewModel @Inject constructor(
         }
     }
 
+    /** Goes through the editor so the cursor moves to the change and scrolls into view */
     fun onUndoClicked() {
         if (selectedPosition !in documents.indices || settings.readOnly) {
             return
         }
-
-        val documentState = documents[selectedPosition]
-        val content = documentState.content ?: return
-        content.undo()
-
-        val canUndo = content.canUndo()
-        val canRedo = content.canRedo()
-
-        val needsUpdate =
-            documentState.canUndo != canUndo ||
-                documentState.canRedo != canRedo
-
-        if (!needsUpdate) return
-
-        documents = documents.mapSelected { state ->
-            state.copy(
-                canUndo = canUndo,
-                canRedo = canRedo,
-            )
-        }
-        _viewState.update {
-            it.copy(documents = documents)
+        viewModelScope.launch {
+            _viewEvent.send(EditorViewEvent.Command(EditorCommand.Undo))
         }
     }
 
+    /** Goes through the editor so the cursor moves to the change and scrolls into view */
     fun onRedoClicked() {
         if (selectedPosition !in documents.indices || settings.readOnly) {
             return
         }
-
-        val documentState = documents[selectedPosition]
-        val content = documentState.content ?: return
-        content.redo()
-
-        val canUndo = content.canUndo()
-        val canRedo = content.canRedo()
-
-        val needsUpdate =
-            documentState.canUndo != canUndo ||
-                documentState.canRedo != canRedo
-
-        if (!needsUpdate) return
-
-        documents = documents.mapSelected { state ->
-            state.copy(
-                canUndo = canUndo,
-                canRedo = canRedo,
-            )
-        }
-        _viewState.update {
-            it.copy(documents = documents)
+        viewModelScope.launch {
+            _viewEvent.send(EditorViewEvent.Command(EditorCommand.Redo))
         }
     }
 

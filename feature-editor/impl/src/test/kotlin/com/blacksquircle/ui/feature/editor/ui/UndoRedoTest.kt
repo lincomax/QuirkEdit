@@ -23,7 +23,9 @@ import com.blacksquircle.ui.feature.editor.api.interactor.EditorInteractor
 import com.blacksquircle.ui.feature.editor.createDocument
 import com.blacksquircle.ui.feature.editor.domain.interactor.LanguageInteractor
 import com.blacksquircle.ui.feature.editor.domain.repository.DocumentRepository
+import com.blacksquircle.ui.feature.editor.ui.editor.EditorViewEvent
 import com.blacksquircle.ui.feature.editor.ui.editor.EditorViewModel
+import com.blacksquircle.ui.feature.editor.ui.editor.model.EditorCommand
 import com.blacksquircle.ui.feature.fonts.api.interactor.FontsInteractor
 import com.blacksquircle.ui.feature.git.api.interactor.GitInteractor
 import com.blacksquircle.ui.feature.shortcuts.api.interactor.ShortcutsInteractor
@@ -37,6 +39,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -69,7 +72,7 @@ class UndoRedoTest {
     }
 
     @Test
-    fun `When undo clicked Then undo changes`() = runTest {
+    fun `When undo clicked Then send undo command`() = runTest {
         // Given
         val documentList = listOf(
             createDocument(uuid = "1", fileName = "first.txt", position = 0),
@@ -88,7 +91,8 @@ class UndoRedoTest {
         viewModel.onUndoClicked()
 
         // Then
-        coVerify(exactly = 1) { content.undo() }
+        val command = EditorViewEvent.Command(EditorCommand.Undo)
+        assertEquals(command, viewModel.viewEvent.first())
     }
 
     @Test
@@ -115,7 +119,7 @@ class UndoRedoTest {
     }
 
     @Test
-    fun `When redo clicked Then redo changes`() = runTest {
+    fun `When redo clicked Then send redo command`() = runTest {
         // Given
         val documentList = listOf(
             createDocument(uuid = "1", fileName = "first.txt", position = 0),
@@ -134,7 +138,8 @@ class UndoRedoTest {
         viewModel.onRedoClicked()
 
         // Then
-        coVerify(exactly = 1) { content.redo() }
+        val command = EditorViewEvent.Command(EditorCommand.Redo)
+        assertEquals(command, viewModel.viewEvent.first())
     }
 
     @Test
