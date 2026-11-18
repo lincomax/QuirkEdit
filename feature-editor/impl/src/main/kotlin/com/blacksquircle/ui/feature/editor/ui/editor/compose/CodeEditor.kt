@@ -233,7 +233,11 @@ internal fun CodeEditor(
                 }
                 is EditorCommand.GoToLine -> {
                     val lineNumber = minOf(view.lineCount - 1, maxOf(0, command.line))
-                    view.setSelection(lineNumber, 0)
+                    /** Land after the indentation */
+                    val line = view.text.getLineString(lineNumber)
+                    val column = line.indexOfFirst { it != ' ' && it != '\t' }
+                        .takeIf { it >= 0 } ?: line.length
+                    view.setSelection(lineNumber, column)
                 }
                 is EditorCommand.PreviousMatch -> {
                     if (view.searcher.hasQuery()) {

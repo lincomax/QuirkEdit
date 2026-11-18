@@ -233,30 +233,34 @@ internal class EditorViewModel @Inject constructor(
                 val document = documents[selectedPosition].document
                 val content = documents[selectedPosition].content ?: return@launch
 
-                if (document.isUntitled) {
-                    /** The untitled tab becomes the saved file */
-                    val savedDocument = documentRepository.saveUntitledAs(
-                        document = document.copy(
-                            scrollX = content.scrollX,
-                            scrollY = content.scrollY,
-                            selectionStart = content.selectionStart,
-                            selectionEnd = content.selectionEnd,
-                        ),
-                        content = content,
-                        fileUri = fileUri,
-                    )
-                    markSaved(savedDocument.uuid, content)
-                    /** The new extension can mean a new language, e.g. .html */
-                    languageInteractor.registerGrammar(savedDocument.language)
-                    documents = documents.mapSelected { state ->
-                        state.copy(document = savedDocument)
-                    }
-                    _viewState.update {
-                        it.copy(documents = documents)
-                    }
-                } else {
-                    documentRepository.saveExternal(document, content, fileUri)
+                /** The tab becomes the saved file; the original file is left as it was */
+                val savedDocument = documentRepository.saveUntitledAs(
+                    document = document.copy(
+                        scrollX = content.scrollX,
+                        scrollY = content.scrollY,
+                        selectionStart = content.selectionStart,
+                        selectionEnd = content.selectionEnd,
+                    ),
+                    content = content,
+                    fileUri = fileUri,
+                )
+                markSaved(savedDocument.uuid, content)
+                /** The new extension can mean a new language, e.g. .html */
+                languageInteractor.registerGrammar(savedDocument.language)
+                documents = documents.mapSelected { state ->
+                    state.copy(document = savedDocument)
                 }
+                _viewState.update {
+                    it.copy(documents = documents)
+                }
+
+                /** If the new file was already open in another tab, close that tab */
+                documents
+                    .firstOrNull {
+                        it.document.uuid != savedDocument.uuid &&
+                            it.document.fileUri == savedDocument.fileUri
+                    }
+                    ?.let { onCloseClicked(it.document, fromUser = false) }
 
                 val message = stringProvider.getString(R.string.editor_toast_file_saved)
                 _viewEvent.send(ViewEvent.Toast(message))
