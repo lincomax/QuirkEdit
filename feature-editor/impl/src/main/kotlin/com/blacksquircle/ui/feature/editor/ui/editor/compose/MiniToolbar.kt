@@ -80,7 +80,7 @@ internal fun MiniToolbar(
                 MiniToolbarAction.REDO -> onRedoClicked to (currentDocument?.canRedo ?: false)
                 MiniToolbarAction.SEARCH -> onFindClicked to hasDocument
                 MiniToolbarAction.GO_TO_LINE -> onGoToLineClicked to hasDocument
-                MiniToolbarAction.SAVE -> onSaveFileClicked to hasDocument
+                MiniToolbarAction.SAVE -> onSaveFileClicked to (currentDocument?.document?.modified ?: false)
                 MiniToolbarAction.SAVE_AS -> onSaveFileAsClicked to hasDocument
                 MiniToolbarAction.CLOSE -> onCloseFileClicked to hasDocument
             }
