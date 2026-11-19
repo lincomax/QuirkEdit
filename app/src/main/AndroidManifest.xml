@@ -68,6 +68,22 @@
                 <data android:mimeType="application/x-sh" />
                 <data android:mimeType="application/x-yaml" />
             </intent-filter>
+            <!-- Text or files shared from other apps -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:mimeType="text/*" />
+                <data android:mimeType="application/javascript" />
+                <data android:mimeType="application/json" />
+                <data android:mimeType="application/sql" />
+                <data android:mimeType="application/xml" />
+                <data android:mimeType="application/x-sh" />
+                <data android:mimeType="application/x-yaml" />
+                <data android:mimeType="application/octet-stream" />
+            </intent-filter>
         </activity>
 
         <!-- Passing data using implicit intent ("Open With" system dialog) -->

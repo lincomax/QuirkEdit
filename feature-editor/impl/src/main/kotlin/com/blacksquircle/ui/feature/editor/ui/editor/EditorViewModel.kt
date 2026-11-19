@@ -157,6 +157,25 @@ internal class EditorViewModel @Inject constructor(
         }
     }
 
+    /** Text shared from another app opens in a new unsaved tab */
+    private fun onTextShared(text: String) {
+        viewModelScope.launch {
+            try {
+                val name = stringProvider.getString(R.string.editor_untitled)
+                val untitled = documentRepository.openUntitled(name, documents.size)
+                val document = untitled.copy(modified = true)
+                documentRepository.cacheDocument(document, Content(text))
+                documentRepository.changeModified(document, true)
+                loadDocument(document, fromUser = true)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Timber.e(e, e.message)
+                _viewEvent.send(ViewEvent.Toast(e.message.orEmpty()))
+            }
+        }
+    }
+
     fun onOpenFileClicked() {
         viewModelScope.launch {
             _viewEvent.send(EditorViewEvent.OpenFileContract)
@@ -1524,6 +1543,10 @@ internal class EditorViewModel @Inject constructor(
 
                         is EditorApiEvent.OpenFileUri -> {
                             onFileOpened(event.fileUri)
+                        }
+
+                        is EditorApiEvent.OpenText -> {
+                            onTextShared(event.text)
                         }
 
                         is EditorApiEvent.RenameFile -> {

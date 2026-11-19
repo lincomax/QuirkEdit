@@ -17,6 +17,8 @@
 package com.blacksquircle.ui.application
 
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -27,6 +29,8 @@ import com.blacksquircle.ui.core.settings.SettingsManager.Companion.KEY_FULLSCRE
 import com.blacksquircle.ui.feature.editor.api.interactor.EditorInteractor
 import com.blacksquircle.ui.feature.themes.api.interactor.ThemeInteractor
 import com.blacksquircle.ui.navigation.api.Navigator
+import javax.inject.Inject
+import javax.inject.Provider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -38,8 +42,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import javax.inject.Inject
-import javax.inject.Provider
 
 internal class MainViewModel @Inject constructor(
     private val settingsManager: SettingsManager,
@@ -70,8 +72,35 @@ internal class MainViewModel @Inject constructor(
 
     fun onNewIntent(intent: Intent) {
         viewModelScope.launch {
-            val fileUri = intent.data ?: return@launch
-            editorInteractor.openFileUri(fileUri)
+            when (intent.action) {
+                /** Shared from another app: files first, otherwise the text itself */
+                Intent.ACTION_SEND -> {
+                    val stream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableExtra(Intent.EXTRA_STREAM)
+                    }
+                    val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
+                    when {
+                        stream != null -> editorInteractor.openFileUri(stream)
+                        !text.isNullOrEmpty() -> editorInteractor.openText(text)
+                    }
+                }
+                Intent.ACTION_SEND_MULTIPLE -> {
+                    val streams = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableArrayListExtra(Intent.EXTRA_STREAM, Uri::class.java)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)
+                    }
+                    streams?.forEach { editorInteractor.openFileUri(it) }
+                }
+                else -> {
+                    val fileUri = intent.data ?: return@launch
+                    editorInteractor.openFileUri(fileUri)
+                }
+            }
         }
     }
 

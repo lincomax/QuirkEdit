@@ -37,6 +37,10 @@ internal class EditorInteractorImpl : EditorInteractor {
         _eventBus.send(EditorApiEvent.OpenFileUri(fileUri))
     }
 
+    override suspend fun openText(text: String) {
+        _eventBus.send(EditorApiEvent.OpenText(text))
+    }
+
     override suspend fun renameFile(fileModel: FileModel, newName: String) {
         _eventBus.send(EditorApiEvent.RenameFile(fileModel, newName))
     }
