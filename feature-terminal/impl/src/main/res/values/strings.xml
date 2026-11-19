@@ -24,4 +24,6 @@
 
     <string name="terminal_installer_message_installing">Installing… %d%%</string>
 
+    <string name="terminal_termux_external_apps">Termux blocked QuirkEdit. In Termux run: echo \"allow-external-apps=true\" &gt;&gt; ~/.termux/termux.properties then restart Termux</string>
+    <string name="terminal_termux_refused">Termux refused to open: %1$s</string>
 </resources>

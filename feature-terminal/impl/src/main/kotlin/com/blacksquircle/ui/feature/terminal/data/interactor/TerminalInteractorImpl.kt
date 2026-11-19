@@ -16,6 +16,7 @@
 
 package com.blacksquircle.ui.feature.terminal.data.interactor
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -24,6 +25,7 @@ import com.blacksquircle.ui.core.settings.SettingsManager
 import com.blacksquircle.ui.feature.terminal.api.interactor.TerminalInteractor
 import com.blacksquircle.ui.feature.terminal.api.model.RuntimeType
 import com.blacksquircle.ui.feature.terminal.api.model.ShellArgs
+import com.blacksquircle.ui.feature.terminal.data.receiver.TermuxResultReceiver
 import com.termux.shared.termux.TermuxConstants.*
 import com.termux.shared.termux.TermuxConstants.TERMUX_APP.*
 import com.termux.shared.termux.TermuxConstants.TERMUX_APP.RUN_COMMAND_SERVICE.*
@@ -67,6 +69,18 @@ internal class TerminalInteractorImpl(
                 putExtra(EXTRA_WORKDIR, args?.workingDir)
                 // https://github.com/termux/termux-app/commit/b94dc7eea93962f11b55cd9f5cb7aff715a1f4a6
                 putExtra(EXTRA_BACKGROUND, false)
+                /** Termux reports refusals (e.g. allow-external-apps) back to this receiver */
+                val resultIntent = Intent(context, TermuxResultReceiver::class.java)
+                val mutable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    PendingIntent.FLAG_MUTABLE
+                } else {
+                    0
+                }
+                val flags = PendingIntent.FLAG_UPDATE_CURRENT or mutable
+                putExtra(
+                    "com.termux.RUN_COMMAND_PENDING_INTENT",
+                    PendingIntent.getBroadcast(context, 0, resultIntent, flags),
+                )
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)

@@ -70,7 +70,7 @@
     <string name="editor_termux_not_installed">Termux isn\'t installed</string>
     <string name="editor_termux_incompatible">This Termux can\'t run commands from other apps. Install Termux from F-Droid or GitHub</string>
     <string name="editor_termux_no_permission">Allow \"Run commands in Termux environment\" for QuirkEdit in Android settings</string>
-    <string name="editor_termux_failed">Couldn\'t start Termux. Make sure allow-external-apps=true is set in termux.properties</string>
+    <string name="editor_termux_failed">Couldn\'t start Termux</string>
     <string name="editor_menu_statistics" translatable="false">Statistics</string>
     <string name="editor_statistics_lines" translatable="false">Lines</string>
     <string name="editor_statistics_words" translatable="false">Words</string>
