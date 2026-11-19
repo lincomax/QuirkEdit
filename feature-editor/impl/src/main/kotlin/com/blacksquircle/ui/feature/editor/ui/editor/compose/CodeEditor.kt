@@ -237,7 +237,9 @@ internal fun CodeEditor(
                     val line = view.text.getLineString(lineNumber)
                     val column = line.indexOfFirst { it != ' ' && it != '\t' }
                         .takeIf { it >= 0 } ?: line.length
-                    view.setSelection(lineNumber, column)
+                    /** Jump straight there: the animated scroll stalls when the dialog closes */
+                    view.setSelection(lineNumber, column, false)
+                    view.ensurePositionVisible(lineNumber, column, true)
                 }
                 is EditorCommand.PreviousMatch -> {
                     if (view.searcher.hasQuery()) {
