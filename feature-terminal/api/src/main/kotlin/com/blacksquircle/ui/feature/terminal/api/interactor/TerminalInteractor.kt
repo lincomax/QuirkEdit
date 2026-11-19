@@ -26,5 +26,6 @@ interface TerminalInteractor {
     fun isTermuxCompatible(): Boolean
     fun isTermuxPermissionGranted(): Boolean
 
-    fun openTermux(args: ShellArgs? = null)
+    /** Returns false if Termux couldn't be started */
+    fun openTermux(args: ShellArgs? = null): Boolean
 }

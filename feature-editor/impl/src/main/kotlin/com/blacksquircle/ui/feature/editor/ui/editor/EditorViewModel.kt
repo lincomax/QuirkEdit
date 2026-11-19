@@ -967,7 +967,17 @@ internal class EditorViewModel @Inject constructor(
     fun onTerminalClicked() {
         viewModelScope.launch {
             if (terminalInteractor.isTermux()) {
-                terminalInteractor.openTermux()
+                /** Termux fails silently, so say what's missing */
+                val problem = when {
+                    !terminalInteractor.isTermuxInstalled() -> R.string.editor_termux_not_installed
+                    !terminalInteractor.isTermuxCompatible() -> R.string.editor_termux_incompatible
+                    !terminalInteractor.isTermuxPermissionGranted() -> R.string.editor_termux_no_permission
+                    !terminalInteractor.openTermux() -> R.string.editor_termux_failed
+                    else -> null
+                }
+                if (problem != null) {
+                    _viewEvent.send(ViewEvent.Toast(stringProvider.getString(problem)))
+                }
             } else {
                 val screen = TerminalRoute()
                 navigator.navigate(screen)

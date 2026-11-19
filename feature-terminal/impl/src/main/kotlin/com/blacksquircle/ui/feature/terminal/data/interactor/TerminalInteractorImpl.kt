@@ -58,8 +58,8 @@ internal class TerminalInteractorImpl(
         return context.isPermissionGranted(PERMISSION_RUN_COMMAND)
     }
 
-    override fun openTermux(args: ShellArgs?) {
-        runCatching {
+    override fun openTermux(args: ShellArgs?): Boolean {
+        return runCatching {
             val intent = Intent(ACTION_RUN_COMMAND).apply {
                 setClassName(TERMUX_PACKAGE_NAME, RUN_COMMAND_SERVICE_NAME)
 
@@ -73,7 +73,7 @@ internal class TerminalInteractorImpl(
             } else {
                 context.startService(intent)
             }
-        }.onFailure(Timber::e)
+        }.onFailure(Timber::e).isSuccess
     }
 
     companion object {
