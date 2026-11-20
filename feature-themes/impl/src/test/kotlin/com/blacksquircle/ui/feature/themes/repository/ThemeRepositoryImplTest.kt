@@ -58,7 +58,9 @@ class ThemeRepositoryImplTest {
     @Test
     fun `When loading with query Then filter out by name`() = runTest {
         // Given
-        val themeList = AssetsTheme.entries.map(ThemeMapper::toModel).take(1)
+        val themeList = AssetsTheme.entries
+            .filter { it.themeName.contains("Darcula", ignoreCase = true) }
+            .map(ThemeMapper::toModel)
 
         // When
         val themes = themesRepository.loadThemes("Darcula")

@@ -34,7 +34,7 @@ internal class ThemeRepositoryImpl(
     override suspend fun loadThemes(query: String): List<ThemeModel> {
         return withContext(dispatcherProvider.io()) {
             AssetsTheme.entries
-                .filter { it.name.contains(query, ignoreCase = true) }
+                .filter { it.themeName.contains(query, ignoreCase = true) }
                 .map(ThemeMapper::toModel)
         }
     }

@@ -92,6 +92,7 @@ class MainViewModelTest {
     fun `When empty intent received Then do nothing`() = runTest {
         // Given
         val intent = mockk<Intent>().apply {
+            every { action } returns null
             every { data } returns null
         }
         val viewModel = createViewModel()
@@ -108,6 +109,7 @@ class MainViewModelTest {
         // Given
         val uri = mockk<Uri>()
         val intent = mockk<Intent>().apply {
+            every { action } returns Intent.ACTION_VIEW
             every { data } returns uri
         }
         val viewModel = createViewModel()

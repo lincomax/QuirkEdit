@@ -83,6 +83,7 @@ class SaveFileTest {
 
         // When
         val viewModel = createViewModel()
+        content.insert(0, 0, "edited")
         viewModel.onContentChanged()
 
         // Then
@@ -136,6 +137,7 @@ class SaveFileTest {
 
         coEvery { documentRepository.loadDocuments() } returns documentList
         coEvery { documentRepository.loadDocument(selected) } returns content
+        coEvery { documentRepository.loadSavedText(any()) } returns null
 
         // When
         val viewModel = createViewModel()

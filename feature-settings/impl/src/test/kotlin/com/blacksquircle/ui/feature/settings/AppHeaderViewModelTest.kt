@@ -102,6 +102,7 @@ class AppHeaderViewModelTest {
     private fun createViewModel(): AppHeaderViewModel {
         return AppHeaderViewModel(
             settingsManager = settingsManager,
+            stringProvider = mockk(relaxed = true),
             navigator = navigator
         )
     }
