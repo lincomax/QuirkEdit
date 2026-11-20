@@ -37,7 +37,8 @@ internal class MainActivity : ComponentActivity() {
     lateinit var entryProviders: Set<@JvmSuppressWildcards EntryProvider>
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
+        /** Swap straight to the identical in-app loading screen, no fade */
+        installSplashScreen().setOnExitAnimationListener { it.remove() }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

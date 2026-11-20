@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup Java
+        uses: actions/setup-java@v6
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Apply editor engine patches
+        run: |
+          for patch in patches/sora-editor-*.patch; do
+            git -C sora-editor apply "../$patch"
+          done
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest testFossDebugUnitTest --continue
+
+      - name: Compile release
+        if: always()
+        run: ./gradlew :app:compileFossReleaseKotlin
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
