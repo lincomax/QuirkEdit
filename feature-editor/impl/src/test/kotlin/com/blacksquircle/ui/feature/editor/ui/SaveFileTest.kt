@@ -91,6 +91,8 @@ class SaveFileTest {
             DocumentState(
                 document = selected.copy(modified = true),
                 content = content,
+                canUndo = content.canUndo(),
+                canRedo = content.canRedo(),
             )
         )
         assertEquals(documents, viewModel.viewState.value.documents)

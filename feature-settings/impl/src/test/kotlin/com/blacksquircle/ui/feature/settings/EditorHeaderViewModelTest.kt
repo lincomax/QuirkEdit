@@ -59,6 +59,10 @@ class EditorHeaderViewModelTest {
         every { settingsManager.extendedKeyboard } returns false
         every { settingsManager.keyboardPreset } returns "{}()[]"
         every { settingsManager.softKeyboard } returns false
+        every { settingsManager.magnifier } returns true
+        every { settingsManager.cursorHaptics } returns true
+        every { settingsManager.highlightColor } returns 0
+        every { settingsManager.miniToolbarItems } returns ""
 
         // When
         val viewModel = createViewModel() // init {}
