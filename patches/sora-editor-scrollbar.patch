@@ -1,0 +1,15 @@
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java b/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java
+index 7dcf1fd..eb1ea50 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/widget/EditorTouchEventHandler.java
+@@ -922,6 +922,10 @@ public final class EditorTouchEventHandler implements GestureDetector.OnGestureL
+                 distanceX = 0;
+             }
+         }
++        // Show the scrollbar on any drag, not only on fast flings
++        if (distanceX != 0 || distanceY != 0) {
++            notifyScrolled();
++        }
+         int endX = scroller.getCurrX() + (int) distanceX;
+         int endY = scroller.getCurrY() + (int) distanceY;
+         endX = Math.max(endX, 0);

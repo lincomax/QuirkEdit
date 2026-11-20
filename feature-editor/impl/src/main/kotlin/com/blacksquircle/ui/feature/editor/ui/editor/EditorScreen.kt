@@ -206,7 +206,8 @@ internal fun EditorScreen(
                     activity?.finish()
                 }
                 is EditorViewEvent.ScrollToEnd -> {
-                    tabsState.animateScrollToItem(viewState.documents.size)
+                    /** Separate coroutine: the tab bar may not be on screen to finish the animation */
+                    scope.launch { tabsState.animateScrollToItem(viewState.documents.size) }
                 }
                 is EditorViewEvent.CreateFileContract -> {
                     newFileContract.launch(defaultFileName)
@@ -459,17 +460,20 @@ private fun EditorScreen(
                 .fillMaxSize()
                 .padding(contentPadding)
         ) {
-            DocumentTabLayout(
-                tabs = viewState.documents,
-                selectedIndex = viewState.selectedDocument,
-                state = tabsState,
-                onDocumentClicked = { onDocumentClicked(it.document) },
-                onDocumentMoved = onDocumentMoved,
-                onCloseClicked = { onCloseClicked(it.document) },
-                onCloseOthersClicked = { onCloseOthersClicked(it.document) },
-                onCloseAllClicked = onCloseAllClicked,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            /** Tabs only when there is more than one file open */
+            if (viewState.documents.size > 1) {
+                DocumentTabLayout(
+                    tabs = viewState.documents,
+                    selectedIndex = viewState.selectedDocument,
+                    state = tabsState,
+                    onDocumentClicked = { onDocumentClicked(it.document) },
+                    onDocumentMoved = onDocumentMoved,
+                    onCloseClicked = { onCloseClicked(it.document) },
+                    onCloseOthersClicked = { onCloseOthersClicked(it.document) },
+                    onCloseAllClicked = onCloseAllClicked,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
             val currentDocument = viewState.currentDocument
             val content = currentDocument?.content
