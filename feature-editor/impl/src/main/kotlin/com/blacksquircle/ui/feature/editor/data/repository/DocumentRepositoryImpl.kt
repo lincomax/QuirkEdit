@@ -143,7 +143,7 @@ internal class DocumentRepositoryImpl(
         }
     }
 
-    /** Last-modified time of each open file, as of the app's last load or save */
+    /** Last-modified time of each open file by its path, as of the app's last load or save */
     private val knownModifiedTimes = ConcurrentHashMap<String, Long>()
 
     /** Current last-modified time of the file, or null if it can't be checked */
@@ -178,16 +178,16 @@ internal class DocumentRepositoryImpl(
     private fun rememberModifiedTime(document: DocumentModel) {
         val time = lastModifiedOf(document)
         if (time != null) {
-            knownModifiedTimes[document.uuid] = time
+            knownModifiedTimes[document.fileUri] = time
         } else {
-            knownModifiedTimes.remove(document.uuid)
+            knownModifiedTimes.remove(document.fileUri)
         }
     }
 
     override suspend fun isChangedExternally(document: DocumentModel): Boolean {
         return withContext(dispatcherProvider.io()) {
             val current = lastModifiedOf(document) ?: return@withContext false
-            val known = knownModifiedTimes.putIfAbsent(document.uuid, current)
+            val known = knownModifiedTimes.putIfAbsent(document.fileUri, current)
             known != null && known != current
         }
     }
