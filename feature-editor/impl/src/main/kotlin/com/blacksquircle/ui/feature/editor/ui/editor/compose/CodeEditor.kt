@@ -42,6 +42,7 @@ import com.blacksquircle.ui.feature.editor.ui.editor.view.startOfLine
 import com.blacksquircle.ui.feature.editor.ui.editor.view.toggleCase
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.KeyBindingEvent
+import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.util.regex.RegexBackrefGrammar
 import io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions
@@ -121,8 +122,10 @@ internal fun CodeEditor(
                 settings.useSpacesInsteadOfTabs,
                 settings.tabWidth,
             )
+            var restyling = false
             if (editor.getTag(R.id.editor_language_key) != languageKey) {
                 editor.setTag(R.id.editor_language_key, languageKey)
+                restyling = true
                 val editorLanguage = editor.createFromRegistry(
                     language = language,
                     codeCompletion = settings.codeCompletion,
@@ -135,9 +138,13 @@ internal fun CodeEditor(
             }
             /** Re-setting the same text would jump the cursor and scroll back to the saved spot */
             if (editor.text !== content) {
+                restyling = true
                 editor.setText(content)
                 editor.scroller.startScroll(0, 0, content.scrollX, content.scrollY, 0)
                 editor.scroller.abortAnimation()
+            }
+            if (restyling && editor.editorLanguage is TextMateLanguage) {
+                editor.hideUntilStyled()
             }
         },
         onRelease = CodeEditor::release,

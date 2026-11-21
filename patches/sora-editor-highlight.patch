@@ -1,0 +1,34 @@
+diff --git a/editor/src/main/java/io/github/rosemoe/sora/lang/analysis/AsyncIncrementalAnalyzeManager.java b/editor/src/main/java/io/github/rosemoe/sora/lang/analysis/AsyncIncrementalAnalyzeManager.java
+index c8c71b4..fd05a20 100644
+--- a/editor/src/main/java/io/github/rosemoe/sora/lang/analysis/AsyncIncrementalAnalyzeManager.java
++++ b/editor/src/main/java/io/github/rosemoe/sora/lang/analysis/AsyncIncrementalAnalyzeManager.java
+@@ -60,6 +60,8 @@ public abstract class AsyncIncrementalAnalyzeManager<S, T> extends BaseAnalyzeMa
+ 
+     private final static int MSG_BASE = 11451400;
+     private final static int MSG_INIT = MSG_BASE + 1;
++    private final static int EARLY_STYLE_LINES = 120;
++    private final static long EARLY_STYLE_INTERVAL_MS = 150;
+     private final static int MSG_MOD = MSG_BASE + 2;
+     private static int sThreadId = 0;
+     private LooperThread thread;
+@@ -448,6 +450,8 @@ public abstract class AsyncIncrementalAnalyzeManager<S, T> extends BaseAnalyzeMa
+             styles = new Styles(spans = new LockedSpans());
+             S state = getInitialState();
+             var mdf = spans.modify();
++            // Show the first screen as soon as it is colored, then refresh as the rest comes in
++            long lastSent = 0;
+             for (int i = 0; i < shadowed.getLineCount() && !abort && !isInterrupted(); i++) {
+                 var line = shadowed.getLine(i);
+                 var result = tokenizeLine(line, state, i);
+@@ -456,6 +460,11 @@ public abstract class AsyncIncrementalAnalyzeManager<S, T> extends BaseAnalyzeMa
+                 states.add(result.clearSpans());
+                 onAddState(result.state);
+                 mdf.addLineAt(i, spans);
++                long now = System.currentTimeMillis();
++                if (i == EARLY_STYLE_LINES || (lastSent != 0 && now - lastSent >= EARLY_STYLE_INTERVAL_MS)) {
++                    sendNewStyles(styles);
++                    lastSent = now;
++                }
+             }
+             styles.blocks = computeBlocks(shadowed, delegate);
+             styles.setSuppressSwitch(delegate.suppressSwitch);

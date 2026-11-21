@@ -1310,6 +1310,25 @@ internal class EditorViewModel @Inject constructor(
         }
     }
 
+    /** Opens each picked file in its own tab, one after another */
+    fun onFilesOpened(fileUris: List<Uri>) {
+        if (fileUris.isEmpty()) return
+        viewModelScope.launch {
+            for (fileUri in fileUris) {
+                try {
+                    val document = documentRepository.openExternal(fileUri, documents.size)
+                    loadDocument(document, fromUser = true)
+                    currentJob?.join()
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Timber.e(e, e.message)
+                    _viewEvent.send(ViewEvent.Toast(e.message.orEmpty()))
+                }
+            }
+        }
+    }
+
     private fun onFileOpened(fileModel: FileModel) {
         viewModelScope.launch {
             try {

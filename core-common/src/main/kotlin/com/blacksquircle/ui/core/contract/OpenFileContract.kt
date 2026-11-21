@@ -20,6 +20,7 @@ import android.net.Uri
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.OpenDocument
+import androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments
 import androidx.compose.runtime.Composable
 
 @Composable
@@ -32,5 +33,15 @@ fun rememberOpenFileContract(
         } else {
             onResult(ContractResult.Canceled)
         }
+    }
+}
+
+/** Lets the user pick one or more files */
+@Composable
+fun rememberOpenFilesContract(
+    onResult: (List<Uri>) -> Unit
+): ManagedActivityResultLauncher<Array<String>, List<Uri>> {
+    return rememberLauncherForActivityResult(OpenMultipleDocuments()) { result ->
+        onResult(result)
     }
 }

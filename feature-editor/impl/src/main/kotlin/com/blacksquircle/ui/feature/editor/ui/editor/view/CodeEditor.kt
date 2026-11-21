@@ -24,6 +24,7 @@ import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import com.blacksquircle.ui.feature.editor.R
 import io.github.rosemoe.sora.event.SelectionChangeEvent
+import io.github.rosemoe.sora.lang.styling.Styles
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.widget.EditorRenderer
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
@@ -157,6 +158,31 @@ internal class CodeEditor @JvmOverloads constructor(
             }
         }
 
+    private var awaitingStyles = false
+    private val revealRunnable = Runnable { reveal() }
+
+    /** Keep the text hidden until syntax colors arrive, so it never shows uncolored */
+    fun hideUntilStyled() {
+        awaitingStyles = true
+        alpha = 0f
+        removeCallbacks(revealRunnable)
+        postDelayed(revealRunnable, MAX_HIDDEN_MS)
+    }
+
+    private fun reveal() {
+        removeCallbacks(revealRunnable)
+        if (!awaitingStyles) return
+        awaitingStyles = false
+        alpha = 1f
+    }
+
+    override fun setStyles(styles: Styles?) {
+        super.setStyles(styles)
+        if (styles != null) {
+            reveal()
+        }
+    }
+
     override fun onCreateRenderer(): EditorRenderer {
         return SquircleRenderer(this)
     }
@@ -192,6 +218,7 @@ internal class CodeEditor @JvmOverloads constructor(
         private const val MIN_GUTTER_WIDTH = 28
         private const val DIVIDER_MARGIN_LEFT = 2
         private const val DIVIDER_MARGIN_RIGHT = 4
+        private const val MAX_HIDDEN_MS = 1000L
         private const val CURSOR_WIDTH = 1.25f
     }
 }

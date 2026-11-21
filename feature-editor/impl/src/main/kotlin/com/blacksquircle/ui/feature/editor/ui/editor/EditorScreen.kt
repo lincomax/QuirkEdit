@@ -51,7 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.blacksquircle.ui.core.contract.ContractResult
 import com.blacksquircle.ui.core.contract.MimeType
 import com.blacksquircle.ui.core.contract.rememberCreateFileContract
-import com.blacksquircle.ui.core.contract.rememberOpenFileContract
+import com.blacksquircle.ui.core.contract.rememberOpenFilesContract
 import com.blacksquircle.ui.core.effect.CleanupEffect
 import com.blacksquircle.ui.core.effect.ResultEffect
 import com.blacksquircle.ui.core.extensions.daggerViewModel
@@ -181,11 +181,8 @@ internal fun EditorScreen(
             is ContractResult.Canceled -> Unit
         }
     }
-    val openFileContract = rememberOpenFileContract { result ->
-        when (result) {
-            is ContractResult.Success -> viewModel.onFileOpened(result.uri)
-            is ContractResult.Canceled -> Unit
-        }
+    val openFileContract = rememberOpenFilesContract { uris ->
+        viewModel.onFilesOpened(uris)
     }
     val saveFileContract = rememberCreateFileContract(MimeType.TEXT) { result ->
         when (result) {
