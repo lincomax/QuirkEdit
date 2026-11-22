@@ -59,7 +59,7 @@ internal class CodeEditor @JvmOverloads constructor(
 
     override fun initialize(attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) {
         super.initialize(attrs, defStyleAttr, defStyleRes)
-        lineNumberMarginLeft = DIVIDER_MARGIN_LEFT * dpUnit
+        lineNumberMarginLeft = LINE_NUMBER_MARGIN_LEFT * dpUnit
         setDividerMargin(
             DIVIDER_MARGIN_LEFT * dpUnit,
             DIVIDER_MARGIN_RIGHT * dpUnit,
@@ -215,9 +215,10 @@ internal class CodeEditor @JvmOverloads constructor(
     }
 
     companion object {
-        private const val MIN_GUTTER_WIDTH = 28
+        private const val MIN_GUTTER_WIDTH = 0
+        private const val LINE_NUMBER_MARGIN_LEFT = 3
         private const val DIVIDER_MARGIN_LEFT = 2
-        private const val DIVIDER_MARGIN_RIGHT = 4
+        private const val DIVIDER_MARGIN_RIGHT = 6
         private const val MAX_HIDDEN_MS = 1000L
         private const val CURSOR_WIDTH = 1.25f
     }

@@ -46,8 +46,9 @@ object ToolbarSizeDefaults {
             emptyIconPadding = 8.dp,
             emptyActionsPadding = 8.dp,
             iconButtonSize = IconButtonSizeDefaults.M,
-            iconButtonPadding = PaddingValues(0.dp),
-            contentPadding = PaddingValues(horizontal = 8.dp),
+            /** Menu icon 4dp further in; title stays where it was */
+            iconButtonPadding = PaddingValues(start = 4.dp),
+            contentPadding = PaddingValues(start = 4.dp, end = 8.dp),
             textSpacer = 0.dp,
             compactText = true,
         )

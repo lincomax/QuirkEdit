@@ -77,7 +77,7 @@ internal fun ExtendedKeyboard(
         contentPadding = PaddingValues(horizontal = 4.dp, vertical = 2.dp),
         modifier = modifier
             .fillMaxWidth()
-            .background(SquircleTheme.colors.colorBackgroundSecondary)
+            .background(SquircleTheme.colors.colorBackgroundPrimary)
     ) {
         item(
             key = ItemOptions,

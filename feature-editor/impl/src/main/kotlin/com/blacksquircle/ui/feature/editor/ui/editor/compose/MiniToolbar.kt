@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -66,7 +67,8 @@ internal fun MiniToolbar(
         modifier = modifier
             .fillMaxWidth()
             .height(40.dp)
-            .background(SquircleTheme.colors.colorBackgroundSecondary)
+            .shadow(4.dp)
+            .background(SquircleTheme.colors.colorBackgroundPrimary)
     ) {
         items.forEach { action ->
             val (onClick, enabled) = when (action) {

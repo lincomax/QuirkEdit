@@ -60,7 +60,7 @@ fun Toolbar(
         modifier = modifier
             .fillMaxWidth()
             .shadow(toolbarSize.shadowSize)
-            .background(SquircleTheme.colors.colorBackgroundSecondary)
+            .background(SquircleTheme.colors.colorBackgroundPrimary)
             .statusBarsPadding()
     ) {
         ToolbarLayout(

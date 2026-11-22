@@ -108,7 +108,7 @@ internal fun MainScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                /** Status bar: toolbar color dimmed; navigation bar: toolbar color */
+                /** Status bar: a dimmed shade; navigation bar: same as the page */
                 val statusBarColor = lerp(
                     start = SquircleTheme.colors.colorBackgroundSecondary,
                     stop = Color.Black,
@@ -126,7 +126,7 @@ internal fun MainScreen(
                         .align(Alignment.BottomStart)
                         .fillMaxWidth()
                         .windowInsetsBottomHeight(WindowInsets.navigationBars)
-                        .background(SquircleTheme.colors.colorBackgroundSecondary)
+                        .background(SquircleTheme.colors.colorBackgroundPrimary)
                 )
             }
         }
