@@ -1627,6 +1627,8 @@ internal class EditorViewModel @Inject constructor(
         readOnly = settingsManager.readOnly,
         extendedKeyboard = settingsManager.extendedKeyboard,
         miniToolbar = settingsManager.miniToolbar,
+        shortenPaths = settingsManager.shortenPaths,
+        hiddenPathPrefix = settingsManager.effectiveHiddenPathPrefix,
         miniToolbarItems = MiniToolbarItems.parse(settingsManager.miniToolbarItems)
             .filter { it.enabled }
             .map { it.action },

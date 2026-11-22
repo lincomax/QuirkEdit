@@ -19,6 +19,7 @@ package com.blacksquircle.ui.core.settings
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Environment
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -64,6 +65,8 @@ class SettingsManager(private val context: Context) {
         const val KEY_USE_EXTENDED_KEYBOARD = "use_extended_keyboard"
         const val KEY_MINI_TOOLBAR = "mini_toolbar"
         const val KEY_MINI_TOOLBAR_ITEMS = "mini_toolbar_items"
+        const val KEY_SHORTEN_PATHS = "shorten_paths"
+        const val KEY_HIDDEN_PATH_PREFIX = "hidden_path_prefix"
         const val KEY_MAGNIFIER = "magnifier"
         const val KEY_CURSOR_HAPTICS = "cursor_haptics"
         const val KEY_HIGHLIGHT_COLOR = "highlight_color"
@@ -250,6 +253,23 @@ class SettingsManager(private val context: Context) {
     var miniToolbar: Boolean
         get() = sharedPreferences.getBoolean(KEY_MINI_TOOLBAR, true)
         set(value) = sharedPreferences.edit().putBoolean(KEY_MINI_TOOLBAR, value).apply()
+    /** Hide the start of file paths shown under the file name */
+    var shortenPaths: Boolean
+        get() = sharedPreferences.getBoolean(KEY_SHORTEN_PATHS, false)
+        set(value) = sharedPreferences.edit().putBoolean(KEY_SHORTEN_PATHS, value).apply()
+
+    /** The part of the path to hide; empty means this phone's internal storage */
+    var hiddenPathPrefix: String
+        get() = sharedPreferences.getString(KEY_HIDDEN_PATH_PREFIX, "") ?: ""
+        set(value) = sharedPreferences.edit().putString(KEY_HIDDEN_PATH_PREFIX, value).apply()
+
+    /** [hiddenPathPrefix], or this phone's internal storage path when it's empty */
+    val effectiveHiddenPathPrefix: String
+        get() = hiddenPathPrefix.trim().trimEnd('/').ifEmpty { defaultHiddenPathPrefix }
+
+    val defaultHiddenPathPrefix: String
+        get() = Environment.getExternalStorageDirectory().absolutePath.trimEnd('/')
+
     /** Bottom toolbar order and visibility, empty means default */
     var miniToolbarItems: String
         get() = sharedPreferences.getString(KEY_MINI_TOOLBAR_ITEMS, "") ?: ""

@@ -39,6 +39,8 @@ internal data class EditorSettings(
     val readOnly: Boolean = false,
     val extendedKeyboard: Boolean = false,
     val miniToolbar: Boolean = true,
+    val shortenPaths: Boolean = false,
+    val hiddenPathPrefix: String = "",
     val miniToolbarItems: List<MiniToolbarAction> =
         MiniToolbarItems.DEFAULT.filter { it.enabled }.map { it.action },
     val magnifier: Boolean = true,

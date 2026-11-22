@@ -89,7 +89,13 @@ internal fun EditorToolbar(
 
     Toolbar(
         title = currentDocument?.document?.displayName,
-        subtitle = currentDocument?.document?.displayPath,
+        subtitle = currentDocument?.document?.let { document ->
+            if (settings.shortenPaths) {
+                document.shortPath(settings.hiddenPathPrefix)
+            } else {
+                document.displayPath
+            }
+        },
         toolbarSize = ToolbarSizeDefaults.S,
         navigationIcon = UiR.drawable.ic_menu,
         onNavigationClicked = onDrawerClicked,

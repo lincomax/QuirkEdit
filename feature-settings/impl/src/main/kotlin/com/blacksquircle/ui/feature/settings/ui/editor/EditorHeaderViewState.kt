@@ -42,4 +42,6 @@ internal data class EditorHeaderViewState(
     val cursorHaptics: Boolean = true,
     val highlightColor: Int = 0,
     val miniToolbarItems: List<MiniToolbarItem> = MiniToolbarItems.DEFAULT,
+    val shortenPaths: Boolean = false,
+    val hiddenPathPrefix: String = "",
 ) : ViewState

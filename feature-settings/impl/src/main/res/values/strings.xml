@@ -192,4 +192,9 @@
     <string name="settings_export_failed">Couldn\'t export settings</string>
     <string name="settings_import_done">%1$d settings imported</string>
     <string name="settings_import_failed">Not a valid settings file</string>
+    <string name="settings_shorten_paths_title">Shorten file paths</string>
+    <string name="settings_shorten_paths_subtitle">Hide the start of the path shown under the file name</string>
+    <string name="settings_hidden_path_prefix_title">Hide this part of the path</string>
+    <string name="settings_hidden_path_prefix_help">Leave empty to use this phone\'s internal storage</string>
+    <string name="settings_hidden_path_prefix_reset">Reset</string>
 </resources>

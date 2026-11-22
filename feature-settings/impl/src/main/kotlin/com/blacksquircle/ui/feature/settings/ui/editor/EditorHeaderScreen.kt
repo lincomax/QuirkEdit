@@ -92,6 +92,8 @@ internal fun EditorHeaderScreen(
         onSoftKeyboardChanged = viewModel::onSoftKeyboardChanged,
         onMagnifierChanged = viewModel::onMagnifierChanged,
         onMiniToolbarItemsChanged = viewModel::onMiniToolbarItemsChanged,
+        onShortenPathsChanged = viewModel::onShortenPathsChanged,
+        onHiddenPathPrefixChanged = viewModel::onHiddenPathPrefixChanged,
         onCursorHapticsChanged = viewModel::onCursorHapticsChanged,
         onHighlightColorChanged = viewModel::onHighlightColorChanged,
     )
@@ -129,6 +131,8 @@ private fun EditorHeaderScreen(
     onSoftKeyboardChanged: (Boolean) -> Unit = {},
     onMagnifierChanged: (Boolean) -> Unit = {},
     onMiniToolbarItemsChanged: (List<MiniToolbarItem>) -> Unit = {},
+    onShortenPathsChanged: (Boolean) -> Unit = {},
+    onHiddenPathPrefixChanged: (String) -> Unit = {},
     onCursorHapticsChanged: (Boolean) -> Unit = {},
     onHighlightColorChanged: (Int) -> Unit = {},
 ) {
@@ -265,6 +269,23 @@ private fun EditorHeaderScreen(
                 subtitle = stringResource(R.string.settings_read_only_subtitle),
                 checked = viewState.readOnly,
                 onCheckedChange = onReadOnlyChanged,
+            )
+            SwitchPreference(
+                title = stringResource(R.string.settings_shorten_paths_title),
+                subtitle = stringResource(R.string.settings_shorten_paths_subtitle),
+                checked = viewState.shortenPaths,
+                onCheckedChange = onShortenPathsChanged,
+            )
+            TextFieldPreference(
+                title = stringResource(R.string.settings_hidden_path_prefix_title),
+                subtitle = viewState.hiddenPathPrefix,
+                enabled = viewState.shortenPaths,
+                inputValue = viewState.hiddenPathPrefix,
+                helpText = stringResource(R.string.settings_hidden_path_prefix_help),
+                confirmButton = stringResource(UiR.string.common_save),
+                dismissButton = stringResource(R.string.settings_hidden_path_prefix_reset),
+                onConfirmClicked = onHiddenPathPrefixChanged,
+                onDismissClicked = { onHiddenPathPrefixChanged("") },
             )
             HorizontalDivider()
             PreferenceGroup(

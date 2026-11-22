@@ -44,6 +44,18 @@ internal data class DocumentModel(
     val isUntitled: Boolean
         get() = fileUri.startsWith(UNTITLED_PREFIX)
 
+    /** [displayPath] with [prefix] removed from the start, cut only at a whole folder */
+    fun shortPath(prefix: String): String? {
+        val full = displayPath ?: return null
+        val cut = prefix.trim().trimEnd('/')
+        return when {
+            cut.isEmpty() -> full
+            full == cut -> "/"
+            full.startsWith("$cut/") -> full.removePrefix(cut)
+            else -> full
+        }
+    }
+
     /** Human-readable location of the file, shown under the file name */
     val displayPath: String?
         get() = when {

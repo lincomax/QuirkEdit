@@ -166,6 +166,17 @@ internal class EditorHeaderViewModel @Inject constructor(
         }
     }
 
+    fun onShortenPathsChanged(shortenPaths: Boolean) {
+        settingsManager.shortenPaths = shortenPaths
+        _viewState.value = updateViewState()
+    }
+
+    /** Empty resets to this phone's internal storage path */
+    fun onHiddenPathPrefixChanged(prefix: String) {
+        settingsManager.hiddenPathPrefix = prefix.trim().trimEnd('/')
+        _viewState.value = updateViewState()
+    }
+
     fun onMiniToolbarItemsChanged(items: List<MiniToolbarItem>) {
         viewModelScope.launch {
             settingsManager.miniToolbarItems = MiniToolbarItems.serialize(items)
@@ -213,6 +224,8 @@ internal class EditorHeaderViewModel @Inject constructor(
             softKeyboard = settingsManager.softKeyboard,
             magnifier = settingsManager.magnifier,
             miniToolbarItems = MiniToolbarItems.parse(settingsManager.miniToolbarItems),
+            shortenPaths = settingsManager.shortenPaths,
+            hiddenPathPrefix = settingsManager.effectiveHiddenPathPrefix,
             cursorHaptics = settingsManager.cursorHaptics,
             highlightColor = settingsManager.highlightColor,
         )

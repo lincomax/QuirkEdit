@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +30,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.blacksquircle.ui.ds.SquircleTheme
 import com.blacksquircle.ui.ds.toolbar.ToolbarSize
@@ -78,6 +80,12 @@ internal fun ToolbarContent(
                 textAlign = TextAlign.Center,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
+                /** The smaller path text sits slightly right of the title otherwise */
+                modifier = if (toolbarSize.compactText) {
+                    Modifier.offset(x = (-0.75).dp)
+                } else {
+                    Modifier
+                },
             )
         }
     }
