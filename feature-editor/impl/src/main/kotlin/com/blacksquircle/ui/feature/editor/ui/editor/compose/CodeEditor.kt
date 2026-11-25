@@ -43,6 +43,7 @@ import com.blacksquircle.ui.feature.editor.ui.editor.view.toggleCase
 import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.event.KeyBindingEvent
 import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
+import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.text.Content
 import io.github.rosemoe.sora.util.regex.RegexBackrefGrammar
 import io.github.rosemoe.sora.widget.EditorSearcher.SearchOptions
@@ -63,6 +64,8 @@ internal fun CodeEditor(
     onShortcutPressed: (Boolean, Boolean, Boolean, Int) -> Unit = { _, _, _, _ -> },
 ) {
     val context = LocalContext.current
+    /** Where the last edit happened, so undo/redo can jump there */
+    val lastChange = remember { arrayOfNulls<CharPosition>(1) }
     val view = remember {
         CodeEditor(context).apply {
             layoutParams = ViewGroup.LayoutParams(
@@ -70,6 +73,11 @@ internal fun CodeEditor(
                 ViewGroup.LayoutParams.MATCH_PARENT,
             )
             subscribeAlways<ContentChangeEvent> { event ->
+                lastChange[0] = if (event.action == ContentChangeEvent.ACTION_DELETE) {
+                    event.changeStart.fromThis()
+                } else {
+                    event.changeEnd.fromThis()
+                }
                 if (event.action != ContentChangeEvent.ACTION_SET_NEW_TEXT) {
                     onContentChanged()
                 }
@@ -176,12 +184,26 @@ internal fun CodeEditor(
                 is EditorCommand.Paste -> view.pasteText()
 
                 is EditorCommand.Undo -> {
+                    val before = view.cursor.left()
+                    lastChange[0] = null
                     view.undo()
+                    /** Saved history has no cursor positions, so jump to the change if undo didn't */
+                    lastChange[0]?.let { change ->
+                        if (view.cursor.left() == before) {
+                            view.setSelection(change.line, change.column, false)
+                        }
+                        view.ensurePositionVisible(view.cursor.leftLine, view.cursor.leftColumn, true)
+                    }
                     /** Change events fire before the undo stack moves, so refresh once it's done */
                     onContentChanged()
                 }
                 is EditorCommand.Redo -> {
+                    lastChange[0] = null
                     view.redo()
+                    lastChange[0]?.let { change ->
+                        view.setSelection(change.line, change.column, false)
+                        view.ensurePositionVisible(change.line, change.column, true)
+                    }
                     onContentChanged()
                 }
                 is EditorCommand.SelectAll -> view.selectAll()
